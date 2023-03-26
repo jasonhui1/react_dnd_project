@@ -4,20 +4,12 @@ import { GoogleLogin } from '@react-oauth/google';
 import { googleLogout } from '@react-oauth/google';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom'
+import { Todo, NewTodo } from '../types/Todo';
 import { Box, Text, Button, Checkbox, Flex, ListItem, OrderedList, Input, FormControl, Container, Divider } from '@chakra-ui/react';
 
 
-interface Todo {
-    _id: string;
-    title: string;
-    completed: boolean;
-}
 
-interface NewTodo {
-    title: string;
-}
-
-export default function Todo() {
+export default function TodoPage() {
     const [todos, setTodos] = useState<Todo[]>([]);
     const [newTodo, setNewTodo] = useState<NewTodo>({ title: '' });
     const [isLogin, setIsLogin] = useState<boolean>(false);
