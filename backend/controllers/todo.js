@@ -1,15 +1,14 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import TodoMessage from '../models/todo.js';
-import SectionMessage from '../models/section.js';
 
 const router = express.Router();
 
 //Find todo with certain user
 export const getTodos = async (req, res) => {
     try {
-        const todos = await TodoMessage.find()
-        // const todos = await TodoMessage.find({creater_ID: req.userId})
+        // const todos = await TodoMessage.find()
+        const todos = await TodoMessage.find({creater_ID: req.userId})
         res.status(200).json(todos)
 
     } catch (error) {

@@ -5,6 +5,7 @@ import cors from 'cors';
 
 import todo from './routes/todo.js';
 import section from './routes/section.js';
+import board from './routes/board.js';
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -16,6 +17,7 @@ app.use(cors());
 
 app.use('/todo', todo);
 app.use('/section', section);
+app.use('/board', board);
 
 
 const CONNECTION_URL =  process.env.DATABASE_URL

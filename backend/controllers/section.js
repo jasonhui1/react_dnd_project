@@ -1,12 +1,12 @@
 import express from 'express';
 import mongoose from 'mongoose';
-import SectionMessage from '../models/section.js';
+import {Section, Board} from '../models/board.js';
 
 const router = express.Router();
 
 export const getSections = async (req, res) => {
     try {
-        const sections = await SectionMessage.find()
+        const sections = await Section.find()
         res.status(200).json(sections)
 
     } catch (error) {
@@ -16,10 +16,11 @@ export const getSections = async (req, res) => {
 
 export const createSection = async (req, res) => {
     const section = req.body;
-    const newSectionMessage = new SectionMessage({ ...section })
+    const newSection = new Section({ ...section })
+    console.log('newSection', newSection)
     try {
-        await newSectionMessage.save();
-        res.status(201).json(newSectionMessage);
+        await newSection.save();
+        res.status(201).json(newSection);
     } catch (error) {
         res.status(409).json({ message: error.message });
     }
@@ -29,7 +30,7 @@ export const createSectionChild = async (req, res) => {
     const { section_id, todo_id } = req.body;
 
     const update = { $push: { childs: todo_id } }; //$push the id to the childs array.
-    const updatedSection = await SectionMessage.updateOne({ _id: section_id }, update);
+    const updatedSection = await Section.updateOne({ _id: section_id }, update);
 
     if (updatedSection) {
         res.status(200).json(updatedSection)
@@ -42,7 +43,7 @@ export const removeSectionChild = async (req, res) => {
     const { section_id, todo_id } = req.body;
 
     const update = { $pull: { childs: todo_id } }; //$pull removes all matching elements from the childs array.
-    const result = await SectionMessage.updateOne({ _id: section_id }, update);
+    const result = await Section.updateOne({ _id: section_id }, update);
 
     if (result) {
         res.status(200).json(result)
@@ -51,14 +52,12 @@ export const removeSectionChild = async (req, res) => {
     }
 }
 
-export const swapSectionChild = async (req, res) => {
-
-    console.log('swapping')
+export const swapChild = async (req, res) => {
 
     const { section_id, index1, index2 } = req.body;
 
     try {
-        const document = await SectionMessage.findById(section_id);
+        const document = await Section.findById(section_id);
         if (!document) throw new Error(`No document found with id: ${section_id}`);
         if (document.childs.length <= index1 || document.childs.length <= index2) throw new Error(`index exceeds length`);
 
@@ -74,6 +73,29 @@ export const swapSectionChild = async (req, res) => {
     } catch (error) {
         console.error(error);
     }
+}
+
+export const swapSection = async (req, res) => {
+
+    const { prevSectionIndex, currentSectionIndex, todo_id  } = req.body;
+    const sections = await Board.find()
+    console.log(sections)
+    
+    // ({ 'sections': { $elemMatch: { $elemMatch: { name: 'section2' } } } })
+
+
+    // const prevSection = await Board.findOne.skip(prevSectionIndex).limit(1)
+    // if (!prevSection) throw new Error(`No document found with id: ${prevSectionIndex}`);
+    // const newReq ={section_id:prevSectionIndex}
+    // removeSectionChild
+    
+    
+    // const curSection = await Board.findOne.skip(currentSectionIndex).limit(1)
+
+    // const curDocument = await Section.findOne().skip(prevSectionIndex).limit(1)
+    // if (!curDocument) throw new Error(`No document found with id: ${prevSectionIndex}`);
+    // createSectionChild
+
 }
 
 //TODO: update title and remove section

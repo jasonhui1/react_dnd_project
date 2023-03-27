@@ -17,6 +17,7 @@ interface CardProp {
 interface PassProp {
   _id: string
   index: number
+  sectionIndex:number
 }
 
 function Card({ todo, mySectionIndex, myIndex, moveItem }: CardProp) {
@@ -31,7 +32,7 @@ function Card({ todo, mySectionIndex, myIndex, moveItem }: CardProp) {
       const dragIndex = item.index;
       const hoverIndex = myIndex;
       if (dragIndex === hoverIndex) return
-      
+
       // Calculate the middle
       const hoveredRect = (ref.current as Element).getBoundingClientRect();
       const hoverMiddleY = (hoveredRect.bottom - hoveredRect.top) / 2;
@@ -53,7 +54,7 @@ function Card({ todo, mySectionIndex, myIndex, moveItem }: CardProp) {
 
   const [{ isDragging }, drag] = useDrag({
     type: "todo",
-    item: { _id: todo._id, index: myIndex },
+    item: { _id: todo._id, index: myIndex, sectionIndex: mySectionIndex },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -74,7 +75,7 @@ function Card({ todo, mySectionIndex, myIndex, moveItem }: CardProp) {
 interface SectionProps {
   todos: Todo[],
   section: Section,
-  handleDrop: (index: number, _id: string) => void
+  handleDrop:(_id: string, prevSectionIndex:number, index: number, ) => void
   myIndex: number,
   moveItem: (dragIndex: number, hoverIndex: number, sectionIndex: number) => void
 
@@ -86,7 +87,7 @@ interface XYCoord {
 
 interface DropSectionProps {
   myIndex: number,
-  handleDrop: (index: number, _id: string) => void
+  handleDrop: (_id: string, prevSectionIndex:number, index: number, ) => void
   children: React.ReactNode
 
 }
@@ -98,8 +99,9 @@ function DropSection({ myIndex, handleDrop, children }: DropSectionProps) {
     accept: "todo",
     drop: (item: PassProp, monitor) => {
 
-      const { _id } = item
-      handleDrop(myIndex, _id)
+      const { _id, sectionIndex } = item
+      const prevSectionIndex = sectionIndex
+      handleDrop(_id, prevSectionIndex,  myIndex,)
 
     },
     collect: (monitor) => ({
@@ -161,9 +163,18 @@ export default function Board() {
       setTodos(data);
     }
     fetchTodos()
+
+    async function fetchSections() {
+      const { data } = await api.fetchBoard();
+      setSections(data.sections);
+      console.log('sections', data.sections)
+    }
+
+    fetchSections()
   }, []);
 
   // Move the position in the same section
+  //TODO: Use Swap Child api
   const moveItem = (dragIndex: number, hoverIndex: number, sectionIndex: number) => {
     //Update child
     const childs = sections[sectionIndex].childs[dragIndex];
@@ -178,13 +189,13 @@ export default function Board() {
   };
 
   //When drop to a new section
-  const handleDrop = (sectionIndex: number, _id: string) => {
+  //TODO: USe Change Section api
+  const handleDrop = ( _id: string, prevIndex:number, currentIndex: number) => {
     let newSections = [...sections];
     const newIndex = todos.findIndex((todo) => todo._id === _id);
-    const prevIndex = todos[newIndex].prevStatus;
 
     // Check if the todo was dropped in the same section
-    if (sectionIndex === prevIndex) {
+    if (currentIndex === prevIndex) {
       return;
     }
 
@@ -206,11 +217,8 @@ export default function Board() {
     if (prevIndex !== undefined) {
       removeChildFromSection(prevIndex, todos[newIndex]._id);
     }
-    addChildToSection(sectionIndex, todos[newIndex]._id);
+    addChildToSection(currentIndex, todos[newIndex]._id);
 
-
-    // Update the item's previous status
-    setTodos((prevTodos) => prevTodos.map((todo, index) => index === newIndex ? { ...todo, prevStatus: sectionIndex } : todo));
 
     // Update the sections state
     setSections(newSections);

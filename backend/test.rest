@@ -20,6 +20,15 @@ GET http://localhost:5000/todo
 
 GET  http://localhost:5000/section
 
+POST  http://localhost:5000/section
+Content-Type: application/json
+
+{
+    "title": "VFX"
+}
+
+
+
 PUT  http://localhost:5000/section
 Content-Type: application/json
 
@@ -38,6 +47,12 @@ Content-Type: application/json
     "index2": "15"
 }
 
+PUT  http://localhost:5000/section/swapSection
+Content-Type: application/json
+
+{
+    "prevSectionIndex":1
+}
 
 
 DELETE http://localhost:5000/section
@@ -45,5 +60,9 @@ Content-Type: application/json
 
 {
     "section_id": "6420da5748fb98f29a30ccf6",
-    "todo_id": null
+    "todo_id": "6421fa0b4a481cb5ead9297d"
 }
+6421fabf8c13d0d6c5d6d020
+6421fbe0b13903a979dfbcf5
+6421fb5cad0c777a7bd9f67a
+6421fbfd31171d7a9b9a30fc
