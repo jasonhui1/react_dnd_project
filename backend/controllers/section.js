@@ -4,7 +4,7 @@ import SectionMessage from '../models/section.js';
 
 const router = express.Router();
 
-export const getSections= async (req, res) => {
+export const getSections = async (req, res) => {
     try {
         const sections = await SectionMessage.find()
         res.status(200).json(sections)
@@ -16,7 +16,7 @@ export const getSections= async (req, res) => {
 
 export const createSection = async (req, res) => {
     const section = req.body;
-    const newSectionMessage = new SectionMessage({ ...section})
+    const newSectionMessage = new SectionMessage({ ...section })
     try {
         await newSectionMessage.save();
         res.status(201).json(newSectionMessage);
@@ -26,14 +26,13 @@ export const createSection = async (req, res) => {
 }
 
 export const createSectionChild = async (req, res) => {
-    const {section_id, todo_id} = req.body;
+    const { section_id, todo_id } = req.body;
 
     const doc = await SectionMessage.findById(section_id);
-
-    if(!doc) return res.status(404).send(`No section with id: ${section_id}`)
+    if (!doc) return res.status(404).send(`No section with id: ${section_id}`)
 
     try {
-        const {childs} = await SectionMessage.findById(section_id)
+        const { childs } = doc
         const newChilds = [...childs, todo_id]
         const todoUpdate = { _id: section_id, childs: newChilds }
 
@@ -43,6 +42,28 @@ export const createSectionChild = async (req, res) => {
         res.status(409).json({ message: error.message });
     }
 }
+
+export const removeSectionChild = async (req, res) => {
+    const { section_id, todo_id } = req.body;
+
+    const doc = await SectionMessage.findById(section_id);
+    if (!doc) return res.status(404).send(`No section with id: ${section_id}`)
+
+    try {
+        const itemIdToRemove = todo_id; // replace with the id of the item to remove
+        const update = { $pull: { childs: itemIdToRemove } }; //$pull removes all matching elements from the array.
+        const result = await SectionMessage.updateOne({ _id: section_id }, update);
+
+        res.status(200).json(result)
+    } catch (error) {
+        res.status(409).json({ message: error.message });
+    }
+}
+
+
+
+
+//TODO: update title and remove section
 
 // //Update certain todo with certain user
 // export const updateTodo = async (req, res) => {

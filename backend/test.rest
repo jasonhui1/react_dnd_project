@@ -26,3 +26,12 @@ GET http://localhost:5000/todo
 #     "todo_id": "64208d77b45d2a4b74e5a0a0"
 # }
 
+GET  http://localhost:5000/section
+
+# DELETE http://localhost:5000/section
+# Content-Type: application/json
+
+# {
+#     "section_id": "6420da5748fb98f29a30ccf6",
+#     "todo_id": "64208d8ab45d2a4b74e5a0a4"
+# }
