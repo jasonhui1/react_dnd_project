@@ -8,9 +8,9 @@ import { useDrag, useDrop } from "react-dnd";
 
 interface CardProp {
   todo: Todo
-  myIndex: number
-  moveItem: (dragIndex: number, hoverIndex: number, sectionIndex: number) => void
   mySectionIndex: number
+  myIndex: number //Index in the section
+  moveItem: (dragIndex: number, hoverIndex: number, sectionIndex: number) => void
 }
 
 // Props for passing between components when dragging and dropping
@@ -19,41 +19,31 @@ interface PassProp {
   index: number
 }
 
-function Card({ todo, myIndex, moveItem, mySectionIndex }: CardProp) {
+function Card({ todo, mySectionIndex, myIndex, moveItem }: CardProp) {
   const ref = useRef(null);
 
   //Drop to todos that are in the same section
   const [_, drop] = useDrop({
     accept: "todo",
     hover(item: PassProp, monitor) {
-      if (!ref.current) {
-        return
-      }
+      if (!ref.current) return
+
       const dragIndex = item.index;
       const hoverIndex = myIndex;
-
-      if (dragIndex === hoverIndex) {
-        return
-      }
-
+      if (dragIndex === hoverIndex) return
+      
       // Calculate the middle
       const hoveredRect = (ref.current as Element).getBoundingClientRect();
       const hoverMiddleY = (hoveredRect.bottom - hoveredRect.top) / 2;
       const mousePosition: XYCoord | null = monitor.getClientOffset();
-      if (mousePosition !== null) {
 
+      if (mousePosition !== null) {
         const hoverClientY = mousePosition.y - hoveredRect.top;
 
         //drag is below but less than middle
-        if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-          return;
-        }
-
+        if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
         //drag is above but less than middle
-        if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-          return;
-        }
-
+        if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
 
         moveItem(dragIndex, hoverIndex, mySectionIndex);
         item.index = hoverIndex;

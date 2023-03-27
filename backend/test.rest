@@ -18,20 +18,32 @@ GET http://localhost:5000/todo
 
 # DELETE  http://localhost:5000/todo/641d943886f7e63aa09c48b1
 
+GET  http://localhost:5000/section
+
 PUT  http://localhost:5000/section
 Content-Type: application/json
 
 {
     "section_id": "6420da5748fb98f29a30ccf6",
-    "todo_id": "64208d77b45d2a4b74e5a0a4"
+    "todo_id": "64208d60b45d2a4b74e5a09a"
 }
 
-GET  http://localhost:5000/section
+
+PUT  http://localhost:5000/section/swap
+Content-Type: application/json
+
+{
+    "section_id": "6420da5748fb98f29a30ccf6",
+    "index1": "0",
+    "index2": "15"
+}
+
+
 
 DELETE http://localhost:5000/section
 Content-Type: application/json
 
 {
     "section_id": "6420da5748fb98f29a30ccf6",
-    "todo_id": "64208d77b45d2a4b74e5a0a4"
+    "todo_id": null
 }

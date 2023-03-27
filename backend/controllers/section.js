@@ -28,7 +28,7 @@ export const createSection = async (req, res) => {
 export const createSectionChild = async (req, res) => {
     const { section_id, todo_id } = req.body;
 
-    const update = { $push: { childs: todo_id } }; //$pull removes all matching elements from the array.
+    const update = { $push: { childs: todo_id } }; //$push the id to the childs array.
     const updatedSection = await SectionMessage.updateOne({ _id: section_id }, update);
 
     if (updatedSection) {
@@ -41,7 +41,7 @@ export const createSectionChild = async (req, res) => {
 export const removeSectionChild = async (req, res) => {
     const { section_id, todo_id } = req.body;
 
-    const update = { $pull: { childs: todo_id } }; //$pull removes all matching elements from the array.
+    const update = { $pull: { childs: todo_id } }; //$pull removes all matching elements from the childs array.
     const result = await SectionMessage.updateOne({ _id: section_id }, update);
 
     if (result) {
@@ -51,8 +51,30 @@ export const removeSectionChild = async (req, res) => {
     }
 }
 
+export const swapSectionChild = async (req, res) => {
 
+    console.log('swapping')
 
+    const { section_id, index1, index2 } = req.body;
+
+    try {
+        const document = await SectionMessage.findById(section_id);
+        if (!document) throw new Error(`No document found with id: ${section_id}`);
+        if (document.childs.length <= index1 || document.childs.length <= index2) throw new Error(`index exceeds length`);
+
+        //Swap
+        // [document.childs[index1], document.childs[index2]] = [document.childs[index2], document.childs[index1]];//give error
+        const temp = document.childs[index1];
+        document.childs[index1] = document.childs[index2];
+        document.childs[index2] = temp;
+
+        // Save the updated document
+        const updatedDocument = await document.save();
+        return updatedDocument;
+    } catch (error) {
+        console.error(error);
+    }
+}
 
 //TODO: update title and remove section
 
