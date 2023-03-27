@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 
 import todo from './routes/todo.js';
+import section from './routes/section.js';
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -14,6 +15,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.use('/todo', todo);
+app.use('/section', section);
 
 
 const CONNECTION_URL =  process.env.DATABASE_URL
