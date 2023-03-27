@@ -28,35 +28,26 @@ export const createSection = async (req, res) => {
 export const createSectionChild = async (req, res) => {
     const { section_id, todo_id } = req.body;
 
-    const doc = await SectionMessage.findById(section_id);
-    if (!doc) return res.status(404).send(`No section with id: ${section_id}`)
+    const update = { $push: { childs: todo_id } }; //$pull removes all matching elements from the array.
+    const updatedSection = await SectionMessage.updateOne({ _id: section_id }, update);
 
-    try {
-        const { childs } = doc
-        const newChilds = [...childs, todo_id]
-        const todoUpdate = { _id: section_id, childs: newChilds }
-
-        const updatedSection = await SectionMessage.findByIdAndUpdate(section_id, todoUpdate, { new: true });
+    if (updatedSection) {
         res.status(200).json(updatedSection)
-    } catch (error) {
-        res.status(409).json({ message: error.message });
+    } else {
+        res.status(404).send(`No section found with id: ${section_id}`);
     }
 }
 
 export const removeSectionChild = async (req, res) => {
     const { section_id, todo_id } = req.body;
 
-    const doc = await SectionMessage.findById(section_id);
-    if (!doc) return res.status(404).send(`No section with id: ${section_id}`)
+    const update = { $pull: { childs: todo_id } }; //$pull removes all matching elements from the array.
+    const result = await SectionMessage.updateOne({ _id: section_id }, update);
 
-    try {
-        const itemIdToRemove = todo_id; // replace with the id of the item to remove
-        const update = { $pull: { childs: itemIdToRemove } }; //$pull removes all matching elements from the array.
-        const result = await SectionMessage.updateOne({ _id: section_id }, update);
-
+    if (result) {
         res.status(200).json(result)
-    } catch (error) {
-        res.status(409).json({ message: error.message });
+    } else {
+        res.status(404).send(`No section found with id: ${section_id}`);
     }
 }
 
