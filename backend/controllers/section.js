@@ -26,6 +26,29 @@ export const createSection = async (req, res) => {
     }
 }
 
+export const deleteTodo = async (req, res) => {
+    //Check the todo is created by the requested user
+    if (creater_ID === req.userId){
+        await TodoMessage.findByIdAndRemove(id);
+        res.json({ message: "Todo deleted successfully." });
+    } else {
+        console.log('creater id', creater_ID, 'id', id, "DELETE: WRONG USER")
+        res.status(409).send("WRONG USER")
+    }
+}
+
+export const deleteSection = async (req, res) => {
+    const { id } = req.params;
+
+    const result = await Section.findByIdAndRemove(id);
+
+    if(result){
+        res.status(201).json({ message: 'success' });
+    } else {
+        res.status(409).json({ message: 'delete id not found' });
+    }
+}
+
 export const createSectionChild = async (req, res) => {
     const { section_id, todo_id } = req.body;
 
@@ -77,28 +100,28 @@ export const swapChild = async (req, res) => {
     }
 }
 
-export const swapSection = async (req, res) => {
+// export const swapSection = async (req, res) => {
 
-    const { prevSectionIndex, currentSectionIndex, todo_id  } = req.body;
-    const sections = await Board.find()
-    console.log(sections)
+//     const { prevSectionIndex, currentSectionIndex, todo_id  } = req.body;
+//     const sections = await Board.find()
+//     console.log(sections)
     
-    // ({ 'sections': { $elemMatch: { $elemMatch: { name: 'section2' } } } })
+//     // ({ 'sections': { $elemMatch: { $elemMatch: { name: 'section2' } } } })
 
 
-    const prevSection = await Board.findOne.skip(prevSectionIndex).limit(1)
-    if (!prevSection) throw new Error(`No document found with id: ${prevSectionIndex}`);
-    const newReq ={section_id:prevSectionIndex}
-    removeSectionChild
+//     const prevSection = await Board.findOne.skip(prevSectionIndex).limit(1)
+//     if (!prevSection) throw new Error(`No document found with id: ${prevSectionIndex}`);
+//     const newReq ={section_id:prevSectionIndex}
+//     removeSectionChild
     
     
-    const curSection = await Board.findOne.skip(currentSectionIndex).limit(1)
+//     const curSection = await Board.findOne.skip(currentSectionIndex).limit(1)
 
-    const curDocument = await Section.findOne().skip(prevSectionIndex).limit(1)
-    if (!curDocument) throw new Error(`No document found with id: ${prevSectionIndex}`);
-    createSectionChild
+//     const curDocument = await Section.findOne().skip(prevSectionIndex).limit(1)
+//     if (!curDocument) throw new Error(`No document found with id: ${prevSectionIndex}`);
+//     createSectionChild
 
-}
+// }
 
 //TODO: update title and remove section
 

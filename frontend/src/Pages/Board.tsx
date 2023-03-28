@@ -17,7 +17,7 @@ interface CardProp {
 interface PassProp {
   _id: string
   index: number
-  sectionIndex:number
+  sectionIndex: number
 }
 
 function Card({ todo, mySectionIndex, myIndex, moveItem }: CardProp) {
@@ -75,9 +75,10 @@ function Card({ todo, mySectionIndex, myIndex, moveItem }: CardProp) {
 interface SectionProps {
   todos: Todo[],
   section: Section,
-  handleDrop:(_id: string, prevSectionIndex:number, index: number, ) => void
+  handleDrop: (_id: string, prevSectionIndex: number, index: number,) => void
   myIndex: number,
   moveItem: (dragIndex: number, hoverIndex: number, sectionIndex: number) => void
+  onClickDeleteSection: (id: string)=> void
 
 }
 interface XYCoord {
@@ -87,7 +88,7 @@ interface XYCoord {
 
 interface DropSectionProps {
   myIndex: number,
-  handleDrop: (_id: string, prevSectionIndex:number, index: number, ) => void
+  handleDrop: (_id: string, prevSectionIndex: number, index: number,) => void
   children: React.ReactNode
 
 }
@@ -101,7 +102,7 @@ function DropSection({ myIndex, handleDrop, children }: DropSectionProps) {
 
       const { _id, sectionIndex } = item
       const prevSectionIndex = sectionIndex
-      handleDrop(_id, prevSectionIndex,  myIndex,)
+      handleDrop(_id, prevSectionIndex, myIndex,)
 
     },
     collect: (monitor) => ({
@@ -126,26 +127,40 @@ function DropSection({ myIndex, handleDrop, children }: DropSectionProps) {
 }
 
 
-function SectionComponent({ todos, section, handleDrop, myIndex, moveItem }: SectionProps) {
+function SectionComponent({ todos, section, handleDrop, myIndex, moveItem, onClickDeleteSection }: SectionProps) {
+
+
 
   return (
-    <DropSection myIndex={myIndex} handleDrop={handleDrop}>
-      {
-        section.childs.map((child_Id: string, child_index) => {
-          const index = todos.findIndex((todo) => todo._id === child_Id);
-          if (index !== -1) {
-            return (
-              <Card key={child_Id} todo={todos[index]} myIndex={child_index} moveItem={moveItem} mySectionIndex={myIndex} />
 
-            )
-          }
-        })}
+    <DropSection myIndex={myIndex} handleDrop={handleDrop}>
+      <Flex direction='column' justify='space-between' h='full'>
+        <Box>
+
+
+          {
+            section.childs.map((child_Id: string, child_index) => {
+              const index = todos.findIndex((todo) => todo._id === child_Id);
+              if (index !== -1) {
+                return (
+                  <Card key={child_index} todo={todos[index]} myIndex={child_index} moveItem={moveItem} mySectionIndex={myIndex} />
+
+                )
+              }
+
+            })}
+
+        </Box>
+        <Button onClick={()=>onClickDeleteSection(section._id)} mt=''> Delete Section</Button>
+      </Flex>
     </DropSection>
+
+
   );
 }
 
 interface Section {
-  _id:string
+  _id: string
   title: string
   childs: string[]
 }
@@ -156,14 +171,14 @@ interface TodoStatus extends Todo {
 
 export default function Board() {
   const [todos, setTodos] = useState<TodoStatus[]>([]);
-  const [sections, setSections] = useState<Section[]>([{ _id:'A', title: 'Element', childs: [] }, { _id:'B' ,title: 'Anime', childs: ['2'] }])
+  const [sections, setSections] = useState<Section[]>([{ _id: 'A', title: 'Element', childs: [] }, { _id: 'B', title: 'Anime', childs: ['2'] }])
 
   //TODO
   //1. Add new board, created by user, with a default section
   //2. Update section when drag and drop (handle drop)
   //3. Update section order when changed order (move item)
-  //4. Add new card -> add to current section
-  //5. Add new section -> add to current board
+  //4. Add/Remove new card -> add to current section
+  //5. Add/Remove new section -> add to current board
   //6. Reorder code
 
   useEffect(() => {
@@ -216,7 +231,7 @@ export default function Board() {
 
   //When drop to a new section
   //TODO: USe Change Section api
-  const handleDrop = ( _id: string, prevIndex:number, currentIndex: number) => {
+  const handleDrop = (_id: string, prevIndex: number, currentIndex: number) => {
     let newSections = [...sections];
     const newIndex = todos.findIndex((todo) => todo._id === _id);
 
@@ -251,7 +266,7 @@ export default function Board() {
   };
 
 
-  const onClickSave = ()=>{
+  const onClickSave = () => {
     //Send sections to api
     async function updateBoard() {
 
@@ -262,24 +277,48 @@ export default function Board() {
     updateBoard()
   }
 
+  function onClickAddSection() {
+    //Add section to database -> get it
+    async function createSections() {
+      const { data } = await api.createSection('A');
+      setSections([...sections, data]);
+      console.log('sections', [...sections, data])
+    }
+
+    createSections()
+    //Push to array ->setSections
+
+  }
+
+  function onClickDeleteSection(id:string) {
+    async function deleteSection() {
+      const { data } = await api.createSection('A');
+      setSections(sections.filter(section=>section._id!==id));
+      console.log(data)
+    }
+    deleteSection()
+  }
+
+
   return (
-    <Flex gap='3'>
-      {/* <SectionCards todos={todos} moveItem={moveItem} /> */}
-      {
-        sections.length >= 0 && sections.map((section, index) => {
-          return (
-            <Box w='250px' h='500px'>
-              <SectionComponent key={index} todos={todos} section={section} handleDrop={handleDrop} myIndex={index} moveItem={moveItem} />
+    <Box>
+      <Flex gap='3'>
+        {/* <SectionCards todos={todos} moveItem={moveItem} /> */}
+        {
+          sections.length >= 0 && sections.map((section, index) => {
+            return (
+              <Box w='250px' h='500px'>
+                <SectionComponent key={index} todos={todos} section={section} handleDrop={handleDrop} myIndex={index} moveItem={moveItem} onClickDeleteSection={onClickDeleteSection}/>
+              </Box>
+            )
+          })
+        }
 
-            </Box>
-          )
-        })
-      }
-        <Button onClick={onClickSave}> Save
+        <Button onClick={onClickAddSection}> Add Section</Button>
 
-
-        </Button>
-    </Flex>
+      </Flex>
+      <Button onClick={onClickSave}> Save</Button>
+    </Box>
 
   )
 }

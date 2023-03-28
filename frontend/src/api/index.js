@@ -16,7 +16,8 @@ export const deleteTodo = (id) => API.delete(`/todo/${id}`);
 
 
 // export const fetchSection = () => API.get(`/section/`);
-// export const createSection= (newSection) => API.post('/section/', newSection);
+export const createSection= (title) => API.post('/section/', {title:title});
+export const deleteSection= (id) => API.delete(`/section/${id}`);
 export const swapChild = (section_id, index1, index2 ) => API.put('/section/swap', {section_id:section_id, index1:index1, index2:index2});
 
 

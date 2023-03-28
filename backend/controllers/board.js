@@ -35,6 +35,7 @@ export const getBoardById = async (req, res) => {
 
 //Get related section -> related todos
 export const updateBoard = async (req, res) => {
+    const { id } = req.params;
     const { sections } = req.body;
 
 
@@ -42,9 +43,15 @@ export const updateBoard = async (req, res) => {
         let result;
         for (const section of sections) {
             result = await Section.updateOne({ _id: section._id }, { $set: section }, { new: true });
-          }
+        }
 
-          return result;
+        const childIds = sections.map(section=>section._id) 
+        result = await Board.updateOne(
+            { _id: id },
+            { sections: childIds }
+          )
+
+        return result;
     }
 
     const result = await updateAll();
