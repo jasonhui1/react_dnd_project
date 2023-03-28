@@ -44,7 +44,7 @@ Content-Type: application/json
 {
     "section_id": "6420da5748fb98f29a30ccf6",
     "index1": "0",
-    "index2": "15"
+    "index2": "2"
 }
 
 PUT  http://localhost:5000/section/swapSection

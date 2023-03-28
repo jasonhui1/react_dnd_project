@@ -54,6 +54,8 @@ export const removeSectionChild = async (req, res) => {
 
 export const swapChild = async (req, res) => {
 
+    console.log("SWAPPING")
+
     const { section_id, index1, index2 } = req.body;
 
     try {
@@ -62,16 +64,16 @@ export const swapChild = async (req, res) => {
         if (document.childs.length <= index1 || document.childs.length <= index2) throw new Error(`index exceeds length`);
 
         //Swap
-        // [document.childs[index1], document.childs[index2]] = [document.childs[index2], document.childs[index1]];//give error
+        // document.childs[index1], document.childs[index2] = document.childs[index2], document.childs[index1];//doesnt work
         const temp = document.childs[index1];
         document.childs[index1] = document.childs[index2];
         document.childs[index2] = temp;
 
         // Save the updated document
         const updatedDocument = await document.save();
-        return updatedDocument;
+        res.status(200).json(updatedDocument)
     } catch (error) {
-        console.error(error);
+        res.status(409).json({message:"swap fail"})
     }
 }
 
@@ -84,17 +86,17 @@ export const swapSection = async (req, res) => {
     // ({ 'sections': { $elemMatch: { $elemMatch: { name: 'section2' } } } })
 
 
-    // const prevSection = await Board.findOne.skip(prevSectionIndex).limit(1)
-    // if (!prevSection) throw new Error(`No document found with id: ${prevSectionIndex}`);
-    // const newReq ={section_id:prevSectionIndex}
-    // removeSectionChild
+    const prevSection = await Board.findOne.skip(prevSectionIndex).limit(1)
+    if (!prevSection) throw new Error(`No document found with id: ${prevSectionIndex}`);
+    const newReq ={section_id:prevSectionIndex}
+    removeSectionChild
     
     
-    // const curSection = await Board.findOne.skip(currentSectionIndex).limit(1)
+    const curSection = await Board.findOne.skip(currentSectionIndex).limit(1)
 
-    // const curDocument = await Section.findOne().skip(prevSectionIndex).limit(1)
-    // if (!curDocument) throw new Error(`No document found with id: ${prevSectionIndex}`);
-    // createSectionChild
+    const curDocument = await Section.findOne().skip(prevSectionIndex).limit(1)
+    if (!curDocument) throw new Error(`No document found with id: ${prevSectionIndex}`);
+    createSectionChild
 
 }
 

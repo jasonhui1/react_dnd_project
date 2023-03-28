@@ -145,6 +145,7 @@ function SectionComponent({ todos, section, handleDrop, myIndex, moveItem }: Sec
 }
 
 interface Section {
+  _id:string
   title: string
   childs: string[]
 }
@@ -155,7 +156,15 @@ interface TodoStatus extends Todo {
 
 export default function Board() {
   const [todos, setTodos] = useState<TodoStatus[]>([]);
-  const [sections, setSections] = useState<Section[]>([{ title: 'Element', childs: [] }, { title: 'Anime', childs: ['2'] }])
+  const [sections, setSections] = useState<Section[]>([{ _id:'A', title: 'Element', childs: [] }, { _id:'B' ,title: 'Anime', childs: ['2'] }])
+
+  //TODO
+  //1. Add new board, created by user, with a default section
+  //2. Update section when drag and drop (handle drop)
+  //3. Update section order when changed order (move item)
+  //4. Add new card -> add to current section
+  //5. Add new section -> add to current board
+  //6. Reorder code
 
   useEffect(() => {
     async function fetchTodos() {
@@ -177,6 +186,23 @@ export default function Board() {
   //TODO: Use Swap Child api
   const moveItem = (dragIndex: number, hoverIndex: number, sectionIndex: number) => {
     //Update child
+
+    //Does not work as intended - has delay
+    // async function swapChild() {
+    //   const {data}  = await api.swapChild(sections[sectionIndex]._id, dragIndex, hoverIndex);
+    //   console.log('data', data)
+    //   let newSections = [...sections]
+    //   newSections[sectionIndex] = data
+
+    //   console.log('data', data)
+
+
+    //   setSections(newSections);
+    //   console.log('newSections', newSections)
+    // }
+
+    // swapChild()
+
     const childs = sections[sectionIndex].childs[dragIndex];
     const updateChilds = sections[sectionIndex].childs.filter((_, index) => index !== dragIndex);
     updateChilds.splice(hoverIndex, 0, childs);
@@ -225,9 +251,20 @@ export default function Board() {
   };
 
 
+  const onClickSave = ()=>{
+    //Send sections to api
+    async function updateBoard() {
+
+      // const section_ids
+      const { data } = await api.updateBoard(sections);
+      console.log('sections', sections)
+    }
+    updateBoard()
+  }
+
   return (
     <Flex gap='3'>
-      <SectionCards todos={todos} moveItem={moveItem} />
+      {/* <SectionCards todos={todos} moveItem={moveItem} /> */}
       {
         sections.length >= 0 && sections.map((section, index) => {
           return (
@@ -238,27 +275,31 @@ export default function Board() {
           )
         })
       }
+        <Button onClick={onClickSave}> Save
+
+
+        </Button>
     </Flex>
 
   )
 }
 
-interface SectionCardsProps {
-  todos: Todo[]
-  moveItem: (dragIndex: number, hoverIndex: number, sectionIndex: number) => void
-}
+// interface SectionCardsProps {
+//   todos: Todo[]
+//   moveItem: (dragIndex: number, hoverIndex: number, sectionIndex: number) => void
+// }
 
 
-function SectionCards({ todos, moveItem }: SectionCardsProps): JSX.Element {
-  return (
-    <Flex gap='3' direction='column'>
-      {
-        todos.map((todo, index) => {
-          return (
-            <Card key={todo._id} todo={todo} myIndex={index} moveItem={moveItem} mySectionIndex={-1} />
-          )
-        })
-      }
-    </Flex>
-  )
-}
+// function SectionCards({ todos, moveItem }: SectionCardsProps): JSX.Element {
+//   return (
+//     <Flex gap='3' direction='column'>
+//       {
+//         todos.map((todo, index) => {
+//           return (
+//             <Card key={todo._id} todo={todo} myIndex={index} moveItem={moveItem} mySectionIndex={-1} />
+//           )
+//         })
+//       }
+//     </Flex>
+//   )
+// }
