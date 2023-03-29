@@ -10,7 +10,9 @@ interface CardProp {
   properties: Todo
   positionIndex: number //Index in the section
   sectionIndex: number
-  moveItem: (dragIndex: number, hoverIndex: number, sectionIndex: number) => void
+  onHoverSwapCard: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
+  onDropSwapCard: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
+
 }
 
 // Props for passing between components when dragging and dropping
@@ -20,7 +22,7 @@ interface PassProp {
   sectionIndex: number
 }
 
-function Card({ properties, positionIndex, sectionIndex, moveItem }: CardProp) {
+function Card({ properties, positionIndex, sectionIndex, onHoverSwapCard, onDropSwapCard }: CardProp) {
   const ref = useRef(null);
 
   //Drop to todos that are in the same section
@@ -46,9 +48,13 @@ function Card({ properties, positionIndex, sectionIndex, moveItem }: CardProp) {
         //drag is above but less than middle
         if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
 
-        moveItem(dragIndex, hoverIndex, sectionIndex);
+        onHoverSwapCard(item._id, hoverIndex, sectionIndex);
         item.index = hoverIndex;
       }
+    },
+    drop: (item: PassProp, monitor) => {
+      const { _id, index, sectionIndex } = item
+      onDropSwapCard(_id, index, sectionIndex)
     },
   });
 
@@ -76,7 +82,8 @@ interface SectionProps {
   properties: Section,
   positionIndex: number,
   handleDrop: (_id: string, prevSectionIndex: number, index: number,) => void
-  moveItem: (dragIndex: number, hoverIndex: number, sectionIndex: number) => void
+  onHoverSwapCard: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
+  onDropSwapCard: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
   onClickDeleteSection: (id: string) => void
   onClickAddCard: (sectionId: string, title: string) => void
   onClickDeleteCard: (sectionId: string, cardId: string) => void
@@ -127,7 +134,7 @@ function DropSection({ positionIndex, handleDrop, children }: DropSectionProps) 
 
 }
 
-function SectionComponent({ properties, positionIndex, handleDrop, moveItem, onClickDeleteSection, onClickAddCard, onClickDeleteCard }: SectionProps) {
+function SectionComponent({ properties, positionIndex, handleDrop, onHoverSwapCard, onDropSwapCard, onClickDeleteSection, onClickAddCard, onClickDeleteCard }: SectionProps) {
 
   return (
 
@@ -140,7 +147,7 @@ function SectionComponent({ properties, positionIndex, handleDrop, moveItem, onC
             properties.cards.map((card: Todo, index) => (
               <Flex key={card._id} justify='space-between'>
 
-                <Card  properties={card} positionIndex={index} sectionIndex={positionIndex} moveItem={moveItem} />
+                <Card properties={card} positionIndex={index} sectionIndex={positionIndex} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard}/>
                 <Button onClick={() => onClickDeleteCard(properties._id, card._id)}>DELETE</Button>
 
               </Flex>
@@ -170,10 +177,7 @@ export default function Board() {
   const BOARDID = '64233d206555d18b2cbedd3d'
   //TODO
   //1. Add new board, created by user, with a default section
-  //2. Update section when drag and drop (handle drop)
   //3. Update section order when changed order (move item)
-  //4. Add/Remove new card -> add to current section
-  //5. Add/Remove new section -> add to current board
   //6. Reorder code
 
   useEffect(() => {
@@ -188,42 +192,63 @@ export default function Board() {
 
   // Move the position in the same section
   //TODO: Use Swap Child api
-  const moveItem = (dragIndex: number, hoverIndex: number, sectionIndex: number) => {
+  //Not added to the database, as it is not certain yet and delay is more obvious
+  const onHoverSwapCard = (dragCardId: string, hoverIndex: number, sectionIndex: number) => {
     //Update child
+    const dragIndex = sections[sectionIndex].cards.findIndex(card => card._id === dragCardId)
 
-    //Does not work as intended - has delay
-    // async function swapChild() {
-    //   const {data}  = await api.swapChild(sections[sectionIndex]._id, dragIndex, hoverIndex);
-    //   console.log('data', data)
-    //   let newSections = [...sections]
-    //   newSections[sectionIndex] = data
+    //Swap between current section
+    if (dragIndex !== -1) {
 
-    //   console.log('data', data)
+      const card = sections[sectionIndex].cards[dragIndex];
+      const updateCards = sections[sectionIndex].cards.filter((_, index) => index !== dragIndex);
+      updateCards.splice(hoverIndex, 0, card);
 
+      //Update section
+      let newSection = [...sections]
+      newSection[sectionIndex] = { ...newSection[sectionIndex], cards: updateCards }
 
-    //   setSections(newSections);
-    //   console.log('newSections', newSections)
-    // }
+      setSections(newSection);
+    } else {
+      //Move to another section
+      //Disable it for now
+      console.log('another section')
 
-    // swapChild()
-
-    const childs = sections[sectionIndex].cards[dragIndex];
-    const updateChilds = sections[sectionIndex].cards.filter((_, index) => index !== dragIndex);
-    updateChilds.splice(hoverIndex, 0, childs);
-
-    //Update section
-    let newSection = [...sections]
-    newSection[sectionIndex] = { ...newSection[sectionIndex], cards: updateChilds }
-
-    setSections(newSection);
+    }
   };
+
+
+  //Card, index to place in, section to place in
+  const onDropSwapCard = (dragCardId: string, hoverIndex: number, sectionIndex: number) => {
+
+    async function changeCardPosition() {
+      const { data } = await api.changeCardPosition(BOARDID, dragCardId, hoverIndex, sectionIndex)
+      setSections(data.sections)
+    }
+    changeCardPosition()
+  }
+
+  // const swapCardPosition = (dragIndex: number, hoverIndex: number, sectionIndex: number) => {
+  //   //Update child
+  //   const childs = sections[sectionIndex].cards[dragIndex];
+  //   const updateChilds = sections[sectionIndex].cards.filter((_, index) => index !== dragIndex);
+  //   updateChilds.splice(hoverIndex, 0, childs);
+
+  //   //Update section
+  //   let newSection = [...sections]
+  //   newSection[sectionIndex] = { ...newSection[sectionIndex], cards: updateChilds }
+
+  //   setSections(newSection);
+  // };
 
   //When drop to a new section
   //TODO: USe Change Section api
-  const handleDrop = (_id: string, prevIndex: number, currentIndex: number) => {
+  const handleDrop = (cardId: string, prevIndex: number, currentIndex: number) => {
 
-    async  function changeCardSection(){
-      const {data} = await api.changeCardSection(BOARDID, _id, prevIndex, currentIndex)
+    if (currentIndex === prevIndex) return;
+
+    async function changeCardSection() {
+      const { data } = await api.changeCardSection(BOARDID, cardId, prevIndex, currentIndex)
       setSections(data.sections)
     }
     changeCardSection()
@@ -261,17 +286,6 @@ export default function Board() {
   };
 
 
-  // const onClickSave = () => {
-  //   //Send sections to api
-  //   async function updateBoard() {
-
-  //     // const section_ids
-  //     const { data } = await api.updateBoard(sections);
-  //     console.log('sections', sections)
-  //   }
-  //   updateBoard()
-  // }
-
   function onClickAddSection() {
     //Add section to database -> get it
     async function createSection() {
@@ -290,14 +304,6 @@ export default function Board() {
     }
     deleteSection()
   }
-
-  // function changeSection(_id:string,changedSection:Section){
-  //   let  newSection =[...sections]
-  //   const index = sections.findIndex(section=>section._id === _id)
-  //   newSection[index] = changedSection
-
-  //   setNew
-  // }
 
   function onClickAddCard(sectionId: string, title: string) {
     //Add section to database -> get it
@@ -320,12 +326,11 @@ export default function Board() {
   return (
     <Box>
       <Flex gap='3'>
-        {/* <SectionCards todos={todos} moveItem={moveItem} /> */}
         {
           sections.length >= 0 && sections.map((section, index) => {
             return (
               <Box w='250px' h='500px' key={section._id}>
-                <SectionComponent  properties={section} positionIndex={index} handleDrop={handleDrop} moveItem={moveItem} onClickDeleteSection={onClickDeleteSection} onClickAddCard={onClickAddCard} onClickDeleteCard={onClickDeleteCard} />
+                <SectionComponent properties={section} positionIndex={index} handleDrop={handleDrop} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteSection={onClickDeleteSection} onClickAddCard={onClickAddCard} onClickDeleteCard={onClickDeleteCard} />
               </Box>
             )
           })
@@ -334,7 +339,6 @@ export default function Board() {
         <Button onClick={onClickAddSection}> Add Section</Button>
 
       </Flex>
-      {/* <Button onClick={onClickSave}> Save</Button> */}
     </Box>
 
   )

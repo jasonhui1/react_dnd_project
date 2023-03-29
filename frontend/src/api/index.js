@@ -21,6 +21,7 @@ export const createSection = (boardId, title)=>API.post(`/board/${boardId}/secti
 export const deleteSection = (boardId, sectionId)=>API.delete(`/board/${boardId}/section/${sectionId}`)
 
 export const changeCardSection = (boardId, cardId, prevSectionIndex, newSectionIndex )=>API.patch(`/board/${boardId}/cardSection/`, {cardId:cardId, prevSectionIndex:prevSectionIndex, newSectionIndex:newSectionIndex})
+export const changeCardPosition = (boardId, cardId, newIndex, sectionIndex )=>API.patch(`/board/${boardId}/cardPosition/`, {cardId:cardId, newIndex:newIndex, sectionIndex:sectionIndex})
 
 
 
