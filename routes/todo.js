@@ -1,6 +1,6 @@
 import express from 'express';
-import { createTodo , getTodos, updateTodo, deleteTodo} from '../controllers/todo.js';
-import auth from '../middleware/auth.js';
+import { createTodo , getTodos, updateTodo, deleteTodo} from '../controllers(old)/todo.js';
+import auth from '../backend/middleware/auth.js';
 
 const router = express.Router();
 

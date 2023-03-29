@@ -1,14 +1,10 @@
 import mongoose from 'mongoose';
 
-
-const BoardSchema = new mongoose.Schema({
-  sections: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref:'Section',
-    default: [],
+const CardSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true
   },
-
-
 });
 
 const SectionSchema = new mongoose.Schema({
@@ -16,12 +12,17 @@ const SectionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  childs: {
-    type: [String],
-    default: [],
-  },
+  cards: [CardSchema]
 });
 
-export const Section = mongoose.model('Section', SectionSchema);
+const BoardSchema = new mongoose.Schema({
+  title:{
+    type: String,
+    required: true,
+  },
+  sections: [SectionSchema]
+});
+
+
 export const Board = mongoose.model('Board', BoardSchema);
 

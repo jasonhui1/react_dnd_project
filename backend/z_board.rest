@@ -1,8 +1,50 @@
 POST  http://localhost:5000/board
-GET  http://localhost:5000/board
-GET  http://localhost:5000/board/6421fbfd31171d7a9b9a30fe
+Content-Type:  application/json
 
-# DELETE http://localhost:5000/board/6421fabf8c13d0d6c5d6d023
+{
+    "title":"my first board"
+}
+
+POST http://localhost:5000/board/64233d206555d18b2cbedd3d/section
+Content-Type:  application/json
+
+{
+    "title":"my 4 section"
+}
+
+POST http://localhost:5000/board/64233d206555d18b2cbedd3d/section/64233fa16ff517fbc6e35095/card
+Content-Type:  application/json
+
+{
+    "title":"my 53 card"
+}
+
+
+# 64233d206555d18b2cbedd3d
+GET  http://localhost:5000/board
+GET  http://localhost:5000/board/64233d206555d18b2cbedd3d
+
+
+DELETE http://localhost:5000/board/64233d206555d18b2cbedd3d/section/6423b5cad24b3c31fa8a0c13
+
+DELETE http://localhost:5000/board/64233d206555d18b2cbedd3d/section/64233fa16ff517fbc6e35095/card/6423b5e97d99d8ba8090c4a9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DELETE http://localhost:5000/board/6421fbfd31171d7a9b9a30fe
 
 # PUT http://localhost:5000/board/6421fbfd31171d7a9b9a30fe
 # Content-Type: application/json
