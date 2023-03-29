@@ -54,11 +54,10 @@ export const patchSection = async (req, res) => {
 };
 
 
+//Drop card to a new section
 export const patchCardSection = async (req, res) => {
     const { boardId } = req.params;
     const { cardId, prevSectionIndex, newSectionIndex } = req.body;
-
-
 
     try {
         const document = await Board.findById(boardId);
@@ -66,7 +65,7 @@ export const patchCardSection = async (req, res) => {
 
         const cardIndex = document.sections[prevSectionIndex].cards.findIndex(card => card._id.toString()  === cardId)
         let card = document.sections[prevSectionIndex].cards[cardIndex]
-        card = card.toObject()
+        card = card.toObject() //cannot push with existing _id
         delete card._id
 
         document.sections[prevSectionIndex].cards.splice(cardIndex, 1)
@@ -78,3 +77,33 @@ export const patchCardSection = async (req, res) => {
         res.status(409).json({ message: "swap fail" })
     }
 };
+
+//Drop card to a new position
+export const swapCard = async (req, res) => {
+
+    console.log("SWAPPING")
+    const { boardId } = req.params;
+    const { cardId, newIndex, sectionIndex } = req.body;
+
+    try {
+        const document = await Board.findById(boardId);
+        if (!document) throw new Error(`No document found with id: ${boardId}`);
+        // if (document.sections[section_id].length <= index1 || document.childs.length <= index2) throw new Error(`index exceeds length`);
+
+        //Swap
+        const currentIndex = document.sections[sectionIndex].cards.findIndex(card=>card._id.toString()===cardId)
+
+        let card = document.sections[sectionIndex].cards[currentIndex];
+        card = card.toObject() //cannot push with existing _id
+        delete card._id
+
+        document.sections[sectionIndex].cards.splice(currentIndex, 1)
+        document.sections[sectionIndex].cards.splice(newIndex, 0, card)
+
+        // Save the updated document
+        const updatedDocument = await document.save();
+        res.status(200).json(updatedDocument)
+    } catch (error) {
+        res.status(409).json({message:"swap fail"})
+    }
+}
