@@ -3,10 +3,9 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import cors from 'cors';
 
-import todo from './routes/todo.js';
-import section from './routes/section.js';
-import board from './routes/board.js';
 import dotenv from 'dotenv'
+import board from './routes/board.js';
+
 dotenv.config()
 
 const app = express();
@@ -15,8 +14,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
 
-app.use('/todo', todo);
-app.use('/section', section);
+// app.use('/todo', todo);
+// app.use('/section', section);
 app.use('/board', board);
 
 
