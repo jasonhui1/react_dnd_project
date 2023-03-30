@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Todo, NewTodo } from '../types/Todo';
 import * as api from '../api';
-import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading } from '@chakra-ui/react';
+import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input } from '@chakra-ui/react';
 import { useDrag, useDrop } from "react-dnd";
 
 
@@ -139,10 +139,11 @@ function DropSection({ positionIndex, handleDrop, children }: DropSectionProps) 
 
 function SectionComponent({ properties, positionIndex, handleDrop, onHoverSwapCard, onDropSwapCard, onClickDeleteSection, onClickAddCard, onClickDeleteCard }: SectionProps) {
 
-  return (
+  const [title, setTitle] = useState('')
 
+  return (
     <DropSection positionIndex={positionIndex} handleDrop={handleDrop}>
-      <Flex direction='column' justify='space-between' h='full'>
+      <Flex direction='column' justify='space-between' h='full' p='3'>
         <Box>
           <Heading>{properties.title}</Heading>
 
@@ -156,8 +157,8 @@ function SectionComponent({ properties, positionIndex, handleDrop, onHoverSwapCa
               </Flex>
             ))
           }
-
-          <Button onClick={() => onClickAddCard(properties._id, 'testing')}>Add new card</Button>
+          <Input w='full' type="text" bg='white' mt='5' mb='1' onChange={(e) => setTitle(e.target.value)} />
+          <Button onClick={() => onClickAddCard(properties._id, title)}>Add new card</Button>
 
         </Box>
         <Button onClick={() => onClickDeleteSection(properties._id)} mt=''> Delete Section</Button>
@@ -177,6 +178,9 @@ interface Section {
 
 export default function Board() {
   const [sections, setSections] = useState<Section[]>([{ _id: 'A', title: 'Element', cards: [] }, { _id: 'B', title: 'Anime', cards: [] }])
+  const [newSectionTitle, setNewSectionTitle] = useState('')
+
+
   const BOARDID = '64233d206555d18b2cbedd3d'
   //TODO
   //1. Add new board, created by user, with a default section
@@ -198,7 +202,7 @@ export default function Board() {
 
     console.log('dragSectionIndex', dragSectionIndex)
     console.log('sectionIndex', sectionIndex)
-    
+
     const prevSectionIndex = sections.findIndex(section => section.cards.some(card => card._id === dragCardId))
 
     //Swap between current section
@@ -318,10 +322,10 @@ export default function Board() {
   };
 
 
-  function onClickAddSection() {
+  function onClickAddSection(title: string) {
     //Add section to database -> get it
     async function createSection() {
-      const { data } = await api.createSection(BOARDID, 'A');
+      const { data } = await api.createSection(BOARDID, title);
       console.log('data', data.sections)
       setSections(data.sections);
     }
@@ -368,7 +372,8 @@ export default function Board() {
           })
         }
 
-        <Button onClick={onClickAddSection}> Add Section</Button>
+        <Input w='min(200px,20%)' type="text" bg='white' mt='5' mb='1' onChange={(e) => setNewSectionTitle(e.target.value)} />
+        <Button onClick={()=>onClickAddSection(newSectionTitle)}> Add Section</Button>
 
       </Flex>
     </Box>
