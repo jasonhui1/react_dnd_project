@@ -12,6 +12,7 @@ router.delete('/:id', deleteBoard);
 
 router.post('/:boardId/section/', createSection)
 router.delete('/:boardId/section/:sectionId', deleteSection)
+
 router.patch('/:boardId/cardSection/', patchCardSection)
 router.patch('/:boardId/cardPosition/', swapCard)
 
