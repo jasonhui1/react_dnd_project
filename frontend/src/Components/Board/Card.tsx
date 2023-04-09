@@ -35,7 +35,7 @@ export default function Card({ properties, positionIndex, sectionIndex, onHoverS
 
             const dragIndex = item.index;
             const hoverIndex = positionIndex;
-            if (dragIndex === hoverIndex) return
+            if (dragIndex === hoverIndex && sectionIndex === item.sectionIndex) return
 
             // Calculate the middle
             const hoveredRect = (ref.current as Element).getBoundingClientRect();
@@ -58,7 +58,7 @@ export default function Card({ properties, positionIndex, sectionIndex, onHoverS
             const prevSectionIndex = item.sectionIndex
             const newSectionIndex = sectionIndex
 
-            // onDropSwapCard(_id, index, sectionIndex)
+            onDropSwapCard(item._id, item.index, sectionIndex)
             console.log(prevSectionIndex, newSectionIndex)
         },
     });

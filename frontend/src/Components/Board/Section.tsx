@@ -66,14 +66,19 @@ export default function SectionComponent({ properties, positionIndex, handleDrop
                     <Heading>{properties.title}</Heading>
 
                     {
-                        properties.cards.map((card: Todo, index) => (
-                            <Flex key={card._id} justify='space-between'>
+                        properties.cards.map((card: Todo, index) => {
+// console.log('carddddddd', card)
+// console.log('properties._iddddddd', properties._id)
+                            return (
 
-                                <Card properties={card} positionIndex={index} sectionIndex={positionIndex} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} />
-                                <Button onClick={() => onClickDeleteCard(properties._id, card._id)}>DELETE</Button>
+                                <Flex key={card._id} justify='space-between'>
 
-                            </Flex>
-                        ))
+                                    <Card properties={card} positionIndex={index} sectionIndex={positionIndex} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} />
+                                    <Button onClick={() => onClickDeleteCard(properties._id, card._id)}>DELETE</Button>
+
+                                </Flex>
+                            )
+                        })
                     }
                     <Input w='full' type="text" bg='white' mt='5' mb='1' onChange={(e) => setTitle(e.target.value)} />
                     <Button onClick={() => onClickAddCard(properties._id, title)}>Add new card</Button>

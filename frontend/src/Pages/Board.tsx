@@ -6,11 +6,16 @@ import { useDrag, useDrop } from "react-dnd";
 import Card from '../Components/Board/Card';
 import SectionComponent, { Section } from '../Components/Board/Section';
 
+interface statusInfo {
+  sectionIndex: number
+  cardIndex: number
+}
 
 
 export default function Board() {
   const [sections, setSections] = useState<Section[]>([{ _id: 'A', title: 'Element', cards: [] }, { _id: 'B', title: 'Anime', cards: [] }])
   const [newSectionTitle, setNewSectionTitle] = useState('')
+  const [draggingCardInfo, setDraggingCardInfo] = useState<statusInfo | null>(null)
 
 
   const BOARDID = '64233d206555d18b2cbedd3d'
@@ -30,70 +35,29 @@ export default function Board() {
 
   // Move the position in the same section
   //Not added to the database, as it is not certain yet and delay is more obvious
-  const onHoverSwapCard = (dragCardId: string, hoverIndex: number, dragSectionIndex: number, sectionIndex: number) => {
+  const onHoverSwapCard = (dragCardId: string, hoverIndex: number, dragSectionIndex: number, newSectionIndex: number) => {
 
-    console.log('dragSectionIndex', dragSectionIndex)
-    console.log('sectionIndex', sectionIndex)
-
+    // Find previous indexes
     const prevSectionIndex = sections.findIndex(section => section.cards.some(card => card._id === dragCardId))
+    const prevCardIndex = sections[prevSectionIndex].cards.findIndex(card => card._id === dragCardId)
+    const updateSections = [...sections]
 
-    //Swap between current section
-    if (prevSectionIndex === sectionIndex) {
+    const card = sections[prevSectionIndex].cards[prevCardIndex];
+    // Update
+    updateSections[prevSectionIndex].cards = updateSections[prevSectionIndex].cards.filter(card => card._id !== dragCardId);
+    updateSections[newSectionIndex].cards.splice(hoverIndex, 0, card);
 
-      const curSection = sections[sectionIndex]
-
-      const dragIndex = curSection.cards.findIndex(card => card._id === dragCardId)
-      const card = curSection.cards[dragIndex];
-      const updateCards = curSection.cards.filter((_, index) => index !== dragIndex);
-      updateCards.splice(hoverIndex, 0, card);
-
-      //Update section
-      let newSection = [...sections]
-      newSection[sectionIndex] = { ...newSection[sectionIndex], cards: updateCards }
-
-      setSections(newSection);
-
-    } else {
-      //Move to another section
-      //Disable it for now
-      // if (prevSectionIndex === -1) {console.log('prev section not found'); return}
-
-      // const prevSection=sections[prevSectionIndex]
-      // console.log('prevSection', prevSection)
-      // // const prevSection = sections[prevSectionIndex]
-
-
-      // const dragIndex = prevSection.cards.findIndex(card => card._id === dragCardId)
-      // console.log('dragIndex', dragIndex)
-      // const card = prevSection.cards[dragIndex];
-      // const prevUpdateCards = prevSection.cards.filter((_, index) => index !== dragIndex);
-
-      // const curUpdateCards = sections[sectionIndex].cards
-      // curUpdateCards.splice(hoverIndex, 0, card)
-      // //Update section
-      // let newSection = [...sections]
-      // newSection[prevSectionIndex] = { ...newSection[prevSectionIndex], cards: prevUpdateCards }
-      // newSection[sectionIndex] = { ...newSection[sectionIndex], cards: curUpdateCards }
-
-      // setSections(newSection);
-
-
-      // console.log('another section', prevSectionIndex, prevUpdateCards, curUpdateCards)
-      console.log('another section')
-
-    }
+    //Update section
+    setSections(updateSections);
   };
 
 
   //Card, index to place in, section to place in
-  const onDropSwapCard = (dragCardId: string, hoverIndex: number, sectionIndex: number) => {
+  const onDropSwapCard = async (dragCardId: string, hoverIndex: number, sectionIndex: number) => {
 
-
-    async function changeCardPosition() {
-      const { data } = await api.changeCardPosition(BOARDID, dragCardId, hoverIndex, sectionIndex)
-      setSections(data.sections)
-    }
-    changeCardPosition()
+    setDraggingCardInfo(null)
+    const { data } = await api.changeCardPosition(BOARDID, dragCardId, hoverIndex, sectionIndex)
+    setSections(data.sections)
   }
 
   // const swapCardPosition = (dragIndex: number, hoverIndex: number, sectionIndex: number) => {
@@ -113,44 +77,13 @@ export default function Board() {
   //TODO: USe Change Section api
   const handleDrop = (cardId: string, prevIndex: number, currentIndex: number) => {
 
-    if (currentIndex === prevIndex) return;
+    // if (currentIndex === prevIndex) return;
 
-    async function changeCardSection() {
-      const { data } = await api.changeCardSection(BOARDID, cardId, prevIndex, currentIndex)
-      setSections(data.sections)
-    }
-    changeCardSection()
-
-
-    // let newSections = [...sections];
-
-    // // Check if the todo was dropped in the same section
-    // if (currentIndex === prevIndex) {
-    //   return;
+    // async function changeCardSection() {
+    //   const { data } = await api.changeCardSection(BOARDID, cardId, prevIndex, currentIndex)
+    //   setSections(data.sections)
     // }
-
-    // // Remove the todo from the previous section's child list
-    // const removeChildFromSection = (section: number, childId: string) => {
-    //   const filteredChilds = newSections[section].cards.filter((child) => child._id !== childId);
-    //   newSections[section] = { ...newSections[section], cards: filteredChilds };
-    // };
-
-
-    // //Add the todo to the new section
-    // const addChildToSection = (section: number, childId: string) => {
-    //   const currentChilds = newSections[section].cards;
-    //   const newChilds = [...currentChilds, childId];
-    //   newSections[section] = { ...newSections[section], cards: newChilds };
-    // };
-
-    // if (prevIndex !== undefined) {
-    //   removeChildFromSection(prevIndex, _id);
-    // }
-    // addChildToSection(currentIndex, _id);
-
-
-    // // Update the sections state
-    // setSections(newSections);
+    // changeCardSection()
   };
 
 
@@ -205,7 +138,7 @@ export default function Board() {
         }
 
         <Input w='min(200px,20%)' type="text" bg='white' mt='5' mb='1' onChange={(e) => setNewSectionTitle(e.target.value)} />
-        <Button onClick={()=>onClickAddSection(newSectionTitle)}> Add Section</Button>
+        <Button onClick={() => onClickAddSection(newSectionTitle)}> Add Section</Button>
 
       </Flex>
     </Box>
