@@ -12,10 +12,11 @@ interface CardProp {
     properties: Todo
     positionIndex: number //Index in the section
     sectionIndex: number
-    onHover: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number) => void
+    onHover: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number, direction:string) => void
     onDrop: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
 
     onClickDeleteCard: (sectionId: string, cardId: string) => void
+
 
 }
 
@@ -23,7 +24,7 @@ interface DroppableCardProp {
     properties: Todo
     positionIndex: number //Index in the section
     sectionIndex: number
-    onHover: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number) => void
+    onHover: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number, direction:string) => void
     onDrop: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
 
     children?: React.ReactNode
@@ -34,10 +35,10 @@ interface DroppableEmptyCardProp {
     properties: Todo
     positionIndex: number //Index in the section
     sectionIndex: number
-    onHover: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number) => void
+    onHover: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number, direction:string) => void
     onDrop: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
 
-    dragIndex:number
+    dragIndex: number
 
 }
 
@@ -48,7 +49,7 @@ export interface PassProp {
     sectionIndex: number
 }
 
-export function DroppableEmptyCard({ properties, dragIndex, positionIndex, sectionIndex, onHover, onDrop,  }: DroppableEmptyCardProp) {
+export function DroppableEmptyCard({ properties, dragIndex, positionIndex, sectionIndex, onHover, onDrop, }: DroppableEmptyCardProp) {
     const ref = useRef(null);
 
     //Drop to todos that are in the same section
@@ -56,13 +57,21 @@ export function DroppableEmptyCard({ properties, dragIndex, positionIndex, secti
 
         accept: "todo",
         hover(item: PassProp, monitor) {
-            console.log('dragIndex, positionIndex', dragIndex, positionIndex)
+            // console.log('dragIndex, positionIndex', dragIndex, positionIndex)
 
             if (!ref.current) return
-            // onHover(item._id, positionIndex, item.sectionIndex, sectionIndex);
+            const hoverIndex = positionIndex;
+            const dragIndex = item.index
+
+            if (dragIndex === hoverIndex) return
+            // item.index = hoverIndex;
+
+            // onHover(item._id, hoverIndex, item.sectionIndex, sectionIndex);
         },
         drop: (item: PassProp, monitor) => {
-            onDrop(item._id, item.index, sectionIndex)
+            console.log('positionIndex', positionIndex)
+            console.log('item.index', item.index)
+            onDrop(item._id, positionIndex, sectionIndex)
         },
         collect: (monitor) => ({
             isOver: !!monitor.isOver(),
@@ -87,8 +96,10 @@ export function DroppableCard({ properties, positionIndex, sectionIndex, onHover
         hover(item: PassProp, monitor) {
             if (!ref.current) return
 
+            console.log('positionIndex', positionIndex)
+
             const hoverIndex = positionIndex;
-            const dragIndex=item.index
+            const dragIndex = item.index
 
             if (dragIndex === hoverIndex) return
 
@@ -101,11 +112,28 @@ export function DroppableCard({ properties, positionIndex, sectionIndex, onHover
                 const hoverClientY = mousePosition.y - hoveredRect.top;
 
                 //drag is below but less than middle
-                if (dragIndex && dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
+                if (dragIndex && dragIndex < hoverIndex && hoverClientY > hoverMiddleY) return;
                 //drag is above but less than middle
-                if (dragIndex && dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
+                if (dragIndex && dragIndex > hoverIndex && hoverClientY < hoverMiddleY) return;
 
-                onHover(item._id, hoverIndex, item.sectionIndex, sectionIndex);
+                console.log('hoverClientY', hoverClientY)
+                console.log('hoverMiddleY', hoverMiddleY)
+                console.log('dragIndex', dragIndex, )
+                console.log('hoverIndex', hoverIndex, )
+
+
+
+                if (hoverClientY > hoverMiddleY) {
+                    console.log('hoverIndex', hoverIndex, 'up')
+                    onHover(item._id, hoverIndex, item.sectionIndex, sectionIndex,'up');
+                } else {
+                    console.log('hoverIndex', hoverIndex, 'down')
+
+                    onHover(item._id, hoverIndex, item.sectionIndex, sectionIndex,'down');
+
+                }
+
+
                 item.index = hoverIndex;
             }
         },
@@ -113,7 +141,7 @@ export function DroppableCard({ properties, positionIndex, sectionIndex, onHover
             const prevSectionIndex = item.sectionIndex
             const newSectionIndex = sectionIndex
 
-            onDrop(item._id, item.index , sectionIndex)
+            onDrop(item._id, item.index, sectionIndex)
             // console.log(prevSectionIndex, newSectionIndex)
         },
     });

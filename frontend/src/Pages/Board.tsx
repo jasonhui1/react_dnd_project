@@ -15,8 +15,7 @@ export default function Board() {
   const [newSectionTitle, setNewSectionTitle] = useState('')
   const [draggingInfo, setDraggingInfo] = useState<statusInfo | null>(null)
   const [hoveringInfo, setHoveringInfo] = useState<statusInfo | null>(null)
-  const [prevHoveringInfo, setPrevHoveringInfo] = useState<statusInfo | null>(null)
-
+  const [direction, setDirection] = useState('')
 
   const BOARDID = '64233d206555d18b2cbedd3d'
   //TODO
@@ -36,20 +35,20 @@ export default function Board() {
   // Move the position in the same section
   //Not added to the database, as it is not certain yet and delay is more obvious
 
-  const onHoverEmpty = (dragCardId: string, hoverIndex: number, dragSectionIndex: number, newSectionIndex: number) => {
-    console.log('hoveringEmpty',)
-    const down = prevHoveringInfo && hoveringInfo && prevHoveringInfo?.cardIndex < hoveringInfo?.cardIndex
-    const add = down ? 1 : 0
+  // const onHoverEmpty = (dragCardId: string, hoverIndex: number, dragSectionIndex: number, newSectionIndex: number) => {
+  //   console.log('hoveringEmpty',)
+  //   const down = prevHoveringInfo && hoveringInfo && prevHoveringInfo?.cardIndex < hoveringInfo?.cardIndex
+  //   const add = down ? 1 : 0
 
 
-    console.log('down', down)
+  //   console.log('down', down)
 
-    setPrevHoveringInfo(hoveringInfo ? { sectionIndex: hoveringInfo.sectionIndex, cardIndex: hoveringInfo.cardIndex + add } : null)
+  //   setPrevHoveringInfo(hoveringInfo ? { sectionIndex: hoveringInfo.sectionIndex, cardIndex: hoveringInfo.cardIndex + add } : null)
 
-  }
+  // }
 
 
-  const onHoverSwapCard = (dragCardId: string, hoverIndex: number, dragSectionIndex: number, newSectionIndex: number) => {
+  const onHoverSwapCard = (dragCardId: string, hoverIndex: number, dragSectionIndex: number, newSectionIndex: number, dir:string) => {
 
     const prevSectionIndex = sections.findIndex(section => section.cards.some(card => card._id === dragCardId))
 
@@ -62,8 +61,8 @@ export default function Board() {
       // let updateCards = [...newSection.cards]
 
       setDraggingInfo({ sectionIndex: dragSectionIndex, cardIndex: dragIndex })
-      setPrevHoveringInfo(hoveringInfo ? { sectionIndex: hoveringInfo.sectionIndex, cardIndex: hoveringInfo.cardIndex } : null)
       setHoveringInfo({ sectionIndex: newSectionIndex, cardIndex: hoverIndex })
+      setDirection(dir)
 
       // const updateCards = newSection.cards.filter((_, index) => index !== dragIndex);
       // updateCards.splice(hoverIndex, 0, card);
@@ -82,8 +81,8 @@ export default function Board() {
     }
   };
 
-  console.log('prevhoveringInfo', prevHoveringInfo)
-  console.log('hoveringInfo', hoveringInfo)
+  // console.log('prevhoveringInfo', prevHoveringInfo)
+  // console.log('hoveringInfo', hoveringInfo)
   // console.log('down', prevHoveringInfo && hoveringInfo && prevHoveringInfo?.cardIndex < hoveringInfo?.cardIndex)
 
 
@@ -92,7 +91,8 @@ export default function Board() {
   const onDropSwapCard = async (dragCardId: string, hoverIndex: number, sectionIndex: number) => {
     setDraggingInfo(null)
     setHoveringInfo(null)
-    setPrevHoveringInfo(null)
+    setDirection('')
+
     const { data } = await api.changeCardPosition(BOARDID, dragCardId, hoverIndex, sectionIndex)
     setSections(data.sections)
   }
@@ -150,7 +150,7 @@ export default function Board() {
           sections.length >= 0 && sections.map((section, index) => {
             return (
               <Box w='250px' h='500px' key={section._id}>
-                <SectionComponent properties={section} positionIndex={index} handleDrop={handleDrop} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteSection={onClickDeleteSection} onClickAddCard={onClickAddCard} onClickDeleteCard={onClickDeleteCard} draggingInfo={draggingInfo} hoveringInfo={hoveringInfo} prevHoveringInfo={prevHoveringInfo} onHoverEmpty={onHoverEmpty} />
+                <SectionComponent properties={section} positionIndex={index} handleDrop={handleDrop} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteSection={onClickDeleteSection} onClickAddCard={onClickAddCard} onClickDeleteCard={onClickDeleteCard} draggingInfo={draggingInfo} hoveringInfo={hoveringInfo} direction={direction}/>
               </Box>
             )
           })

@@ -49,7 +49,7 @@ interface SectionProps {
     properties: Section,
     positionIndex: number,
     handleDrop: (_id: string, prevSectionIndex: number, index: number,) => void
-    onHoverSwapCard: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number) => void
+    onHoverSwapCard: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number, direction: string) => void
     onDropSwapCard: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
     onClickDeleteSection: (id: string) => void
     onClickAddCard: (sectionId: string, title: string) => void
@@ -57,18 +57,15 @@ interface SectionProps {
 
     draggingInfo: statusInfo | null
     hoveringInfo: statusInfo | null
-    prevHoveringInfo: statusInfo | null
-
-    onHoverEmpty: (dragCardId: string, hoverIndex: number, dragSectionIndex: number, newSectionIndex: number) => void
-
+    direction: string
 }
-export default function SectionComponent({ properties, positionIndex, handleDrop, onHoverSwapCard, onDropSwapCard, onClickDeleteSection, onClickAddCard, onClickDeleteCard, draggingInfo, hoveringInfo, prevHoveringInfo, onHoverEmpty }: SectionProps) {
+
+export default function SectionComponent({ properties, positionIndex, handleDrop, onHoverSwapCard, onDropSwapCard, onClickDeleteSection, onClickAddCard, onClickDeleteCard, draggingInfo, hoveringInfo, direction }: SectionProps) {
 
     const [title, setTitle] = useState('')
 
-    const down = prevHoveringInfo && hoveringInfo && prevHoveringInfo?.cardIndex < hoveringInfo?.cardIndex
-
-
+    const down = direction === 'down'
+    console.log('down', down)
 
     return (
         <DropSection positionIndex={positionIndex} handleDrop={handleDrop}>
@@ -79,21 +76,30 @@ export default function SectionComponent({ properties, positionIndex, handleDrop
                     {
                         properties.cards.map((card: Todo, index) => {
 
-                            const hovering = hoveringInfo?.sectionIndex === positionIndex && hoveringInfo.cardIndex === index
-                            const dragging = draggingInfo?.sectionIndex === positionIndex && draggingInfo.cardIndex === index
-                            const add=down?1:0
+
+                            let currentPositionIndex = index
+                            if (draggingInfo && hoveringInfo) {
+                                if (draggingInfo.cardIndex > index && hoveringInfo.cardIndex < index) {
+                                    currentPositionIndex += 1
+                                }
+                                if (draggingInfo.cardIndex < index && hoveringInfo.cardIndex > index) {
+                                    currentPositionIndex -= 1
+                                }
+                            }
+                            const hovering = hoveringInfo?.sectionIndex === positionIndex && hoveringInfo.cardIndex === currentPositionIndex
+                            const dragging = draggingInfo?.sectionIndex === positionIndex && draggingInfo.cardIndex === currentPositionIndex
                             return (
 
                                 <>
                                     {hovering && !down &&
-                                        <DroppableEmptyCard key='block' properties={card} positionIndex={index-1} sectionIndex={positionIndex}
-                                            onHover={onHoverEmpty}
+                                        <DroppableEmptyCard key='block' properties={card} positionIndex={currentPositionIndex} sectionIndex={positionIndex}
+                                            onHover={onHoverSwapCard}
                                             onDrop={onDropSwapCard}
                                             dragIndex={hoveringInfo.cardIndex}
                                         />
                                     }
                                     {!dragging && (
-                                        <Card key={card._id} properties={card} positionIndex={index} sectionIndex={positionIndex}
+                                        <Card key={card._id} properties={card} positionIndex={currentPositionIndex} sectionIndex={positionIndex}
                                             onHover={onHoverSwapCard}
                                             onDrop={onDropSwapCard}
                                             onClickDeleteCard={() => onClickDeleteCard(properties._id, card._id)}
@@ -101,8 +107,8 @@ export default function SectionComponent({ properties, positionIndex, handleDrop
                                         />
                                     )}
                                     {hovering && down &&
-                                        <DroppableEmptyCard key='block' properties={card} positionIndex={index+1} sectionIndex={positionIndex}
-                                            onHover={onHoverEmpty}
+                                        <DroppableEmptyCard key='block' properties={card} positionIndex={currentPositionIndex} sectionIndex={positionIndex}
+                                            onHover={onHoverSwapCard}
                                             onDrop={onDropSwapCard}
                                             dragIndex={hoveringInfo.cardIndex}
                                         />
