@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
 import { Flex, Button, Box, Heading, Input } from '@chakra-ui/react';
 import { useDrop } from "react-dnd";
-import Card, { DroppableCard, DroppableEmptyCard, PassProp } from './Card';
+import Card, { PassProp } from './Card';
 import { Todo } from '../../types/Todo';
-import { statusInfo } from '../../Pages/Board';
+
+
+interface SectionProps {
+    properties: Section,
+    positionIndex: number,
+    handleDrop: (_id: string, prevSectionIndex: number, index: number,) => void
+    onHoverSwapCard: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number) => void
+    onDropSwapCard: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
+    onClickDeleteSection: (id: string) => void
+    onClickAddCard: (sectionId: string, title: string) => void
+    onClickDeleteCard: (sectionId: string, cardId: string) => void
+
+}
 
 interface DropSectionProps {
     positionIndex: number,
@@ -43,29 +55,9 @@ function DropSection({ positionIndex, handleDrop, children }: DropSectionProps) 
     );
 }
 
-
-
-interface SectionProps {
-    properties: Section,
-    positionIndex: number,
-    handleDrop: (_id: string, prevSectionIndex: number, index: number,) => void
-    onHoverSwapCard: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number, direction: string) => void
-    onDropSwapCard: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
-    onClickDeleteSection: (id: string) => void
-    onClickAddCard: (sectionId: string, title: string) => void
-    onClickDeleteCard: (sectionId: string, cardId: string) => void
-
-    draggingInfo: statusInfo | null
-    hoveringInfo: statusInfo | null
-    direction: string
-}
-
-export default function SectionComponent({ properties, positionIndex, handleDrop, onHoverSwapCard, onDropSwapCard, onClickDeleteSection, onClickAddCard, onClickDeleteCard, draggingInfo, hoveringInfo, direction }: SectionProps) {
+export default function SectionComponent({ properties, positionIndex, handleDrop, onHoverSwapCard, onDropSwapCard, onClickDeleteSection, onClickAddCard, onClickDeleteCard }: SectionProps) {
 
     const [title, setTitle] = useState('')
-
-    const down = direction === 'down'
-    console.log('down', down)
 
     return (
         <DropSection positionIndex={positionIndex} handleDrop={handleDrop}>
@@ -75,47 +67,16 @@ export default function SectionComponent({ properties, positionIndex, handleDrop
 
                     {
                         properties.cards.map((card: Todo, index) => {
-
-
-                            let currentPositionIndex = index
-                            if (draggingInfo && hoveringInfo) {
-                                if (draggingInfo.cardIndex > index && hoveringInfo.cardIndex < index) {
-                                    currentPositionIndex += 1
-                                }
-                                if (draggingInfo.cardIndex < index && hoveringInfo.cardIndex > index) {
-                                    currentPositionIndex -= 1
-                                }
-                            }
-                            const hovering = hoveringInfo?.sectionIndex === positionIndex && hoveringInfo.cardIndex === currentPositionIndex
-                            const dragging = draggingInfo?.sectionIndex === positionIndex && draggingInfo.cardIndex === currentPositionIndex
+// console.log('carddddddd', card)
+// console.log('properties._iddddddd', properties._id)
                             return (
 
-                                <>
-                                    {hovering && !down &&
-                                        <DroppableEmptyCard key='block' properties={card} positionIndex={currentPositionIndex} sectionIndex={positionIndex}
-                                            onHover={onHoverSwapCard}
-                                            onDrop={onDropSwapCard}
-                                            dragIndex={hoveringInfo.cardIndex}
-                                        />
-                                    }
-                                    {!dragging && (
-                                        <Card key={card._id} properties={card} positionIndex={currentPositionIndex} sectionIndex={positionIndex}
-                                            onHover={onHoverSwapCard}
-                                            onDrop={onDropSwapCard}
-                                            onClickDeleteCard={() => onClickDeleteCard(properties._id, card._id)}
+                                <Flex key={card._id} justify='space-between'>
 
-                                        />
-                                    )}
-                                    {hovering && down &&
-                                        <DroppableEmptyCard key='block' properties={card} positionIndex={currentPositionIndex} sectionIndex={positionIndex}
-                                            onHover={onHoverSwapCard}
-                                            onDrop={onDropSwapCard}
-                                            dragIndex={hoveringInfo.cardIndex}
-                                        />
+                                    <Card properties={card} positionIndex={index} sectionIndex={positionIndex} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} />
+                                    <Button onClick={() => onClickDeleteCard(properties._id, card._id)}>DELETE</Button>
 
-                                    }
-
-                                </>
+                                </Flex>
                             )
                         })
                     }
@@ -135,9 +96,4 @@ export interface Section {
     _id: string
     title: string
     cards: Todo[]
-}
-
-interface DNDCards extends Todo {
-    dragging?: boolean;
-    hovering?: boolean;
 }

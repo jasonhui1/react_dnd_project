@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Flex, Text, Box, Button, } from '@chakra-ui/react';
+import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input } from '@chakra-ui/react';
 import { useDrag, useDrop } from "react-dnd";
 import { Todo } from '../../types/Todo';
 
@@ -12,33 +12,8 @@ interface CardProp {
     properties: Todo
     positionIndex: number //Index in the section
     sectionIndex: number
-    onHover: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number, direction:string) => void
-    onDrop: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
-
-    onClickDeleteCard: (sectionId: string, cardId: string) => void
-
-
-}
-
-interface DroppableCardProp {
-    properties: Todo
-    positionIndex: number //Index in the section
-    sectionIndex: number
-    onHover: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number, direction:string) => void
-    onDrop: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
-
-    children?: React.ReactNode
-}
-
-
-interface DroppableEmptyCardProp {
-    properties: Todo
-    positionIndex: number //Index in the section
-    sectionIndex: number
-    onHover: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number, direction:string) => void
-    onDrop: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
-
-    dragIndex: number
+    onHoverSwapCard: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number) => void
+    onDropSwapCard: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
 
 }
 
@@ -49,45 +24,7 @@ export interface PassProp {
     sectionIndex: number
 }
 
-export function DroppableEmptyCard({ properties, dragIndex, positionIndex, sectionIndex, onHover, onDrop, }: DroppableEmptyCardProp) {
-    const ref = useRef(null);
-
-    //Drop to todos that are in the same section
-    const [{ isOver }, drop] = useDrop({
-
-        accept: "todo",
-        hover(item: PassProp, monitor) {
-            // console.log('dragIndex, positionIndex', dragIndex, positionIndex)
-
-            if (!ref.current) return
-            const hoverIndex = positionIndex;
-            const dragIndex = item.index
-
-            if (dragIndex === hoverIndex) return
-            // item.index = hoverIndex;
-
-            // onHover(item._id, hoverIndex, item.sectionIndex, sectionIndex);
-        },
-        drop: (item: PassProp, monitor) => {
-            console.log('positionIndex', positionIndex)
-            console.log('item.index', item.index)
-            onDrop(item._id, positionIndex, sectionIndex)
-        },
-        collect: (monitor) => ({
-            isOver: !!monitor.isOver(),
-        }),
-    });
-
-    drop(ref)
-    return (
-        <Box h='2rem' bg='gray.200' ref={ref} />
-
-    );
-}
-
-
-export function DroppableCard({ properties, positionIndex, sectionIndex, onHover, onDrop, children }: DroppableCardProp) {
-
+export default function Card({ properties, positionIndex, sectionIndex, onHoverSwapCard, onDropSwapCard }: CardProp) {
     const ref = useRef(null);
 
     //Drop to todos that are in the same section
@@ -96,12 +33,9 @@ export function DroppableCard({ properties, positionIndex, sectionIndex, onHover
         hover(item: PassProp, monitor) {
             if (!ref.current) return
 
-            console.log('positionIndex', positionIndex)
-
+            const dragIndex = item.index;
             const hoverIndex = positionIndex;
-            const dragIndex = item.index
-
-            if (dragIndex === hoverIndex) return
+            if (dragIndex === hoverIndex && sectionIndex === item.sectionIndex) return
 
             // Calculate the middle
             const hoveredRect = (ref.current as Element).getBoundingClientRect();
@@ -112,28 +46,11 @@ export function DroppableCard({ properties, positionIndex, sectionIndex, onHover
                 const hoverClientY = mousePosition.y - hoveredRect.top;
 
                 //drag is below but less than middle
-                if (dragIndex && dragIndex < hoverIndex && hoverClientY > hoverMiddleY) return;
+                if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
                 //drag is above but less than middle
-                if (dragIndex && dragIndex > hoverIndex && hoverClientY < hoverMiddleY) return;
+                if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
 
-                console.log('hoverClientY', hoverClientY)
-                console.log('hoverMiddleY', hoverMiddleY)
-                console.log('dragIndex', dragIndex, )
-                console.log('hoverIndex', hoverIndex, )
-
-
-
-                if (hoverClientY > hoverMiddleY) {
-                    console.log('hoverIndex', hoverIndex, 'up')
-                    onHover(item._id, hoverIndex, item.sectionIndex, sectionIndex,'up');
-                } else {
-                    console.log('hoverIndex', hoverIndex, 'down')
-
-                    onHover(item._id, hoverIndex, item.sectionIndex, sectionIndex,'down');
-
-                }
-
-
+                onHoverSwapCard(item._id, hoverIndex, item.sectionIndex, sectionIndex);
                 item.index = hoverIndex;
             }
         },
@@ -141,8 +58,8 @@ export function DroppableCard({ properties, positionIndex, sectionIndex, onHover
             const prevSectionIndex = item.sectionIndex
             const newSectionIndex = sectionIndex
 
-            onDrop(item._id, item.index, sectionIndex)
-            // console.log(prevSectionIndex, newSectionIndex)
+            onDropSwapCard(item._id, item.index, sectionIndex)
+            console.log(prevSectionIndex, newSectionIndex)
         },
     });
 
@@ -157,26 +74,10 @@ export function DroppableCard({ properties, positionIndex, sectionIndex, onHover
     drag(drop(ref));
 
     return (
-        <Box bg='blue.500' w='max(200px,full)' opacity={isDragging ? 0.5 : 1} ref={ref}>
-            {children}
-
-        </Box>
-    );
-}
-
-export default function Card({ properties, positionIndex, sectionIndex, onHover, onDrop, onClickDeleteCard }: CardProp) {
-
-    return (
-        <DroppableCard properties={properties} positionIndex={positionIndex} sectionIndex={sectionIndex}
-            onHover={onHover}
-            onDrop={onDrop}>
-
-            <Flex gap='2' justify='space-between' align={'center'}>
+        <Box bg='blue.500' w='max(200px,full)' px='5' py='2' opacity={isDragging ? 0.5 : 1} ref={ref}>
+            <Flex gap='2'>
                 <Text as='span' color='white'>{properties.title}</Text>
-                <Button onClick={() => onClickDeleteCard}>DELETE</Button>
-
             </Flex>
-        </DroppableCard>
-
+        </Box>
     );
 };
