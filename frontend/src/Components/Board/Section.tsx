@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Flex, Button, Box, Heading, Input } from '@chakra-ui/react';
+import { Flex, Button, Box, Heading, Input, Stack, Divider } from '@chakra-ui/react';
 import { useDrop } from "react-dnd";
 import Card, { PassProp } from './Card';
 import { Todo } from '../../types/Todo';
@@ -14,7 +14,6 @@ interface SectionProps {
     onClickDeleteSection: (id: string) => void
     onClickAddCard: (sectionId: string, title: string) => void
     onClickDeleteCard: (sectionId: string, cardId: string) => void
-
 }
 
 interface DropSectionProps {
@@ -63,23 +62,9 @@ export default function SectionComponent({ properties, positionIndex, handleDrop
         <DropSection positionIndex={positionIndex} handleDrop={handleDrop}>
             <Flex direction='column' justify='space-between' h='full' p='3'>
                 <Box>
-                    <Heading>{properties.title}</Heading>
-
-                    {
-                        properties.cards.map((card: Todo, index) => {
-// console.log('carddddddd', card)
-// console.log('properties._iddddddd', properties._id)
-                            return (
-
-                                <Flex key={card._id} justify='space-between'>
-
-                                    <Card properties={card} positionIndex={index} sectionIndex={positionIndex} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} />
-                                    <Button onClick={() => onClickDeleteCard(properties._id, card._id)}>DELETE</Button>
-
-                                </Flex>
-                            )
-                        })
-                    }
+                    <Heading as='h2' size={'lg'}>{properties.title}</Heading>
+                    <Divider my={5}/>
+                    <CardList properties={properties} positionIndex={positionIndex} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteCard={onClickDeleteCard} />
                     <Input w='full' type="text" bg='white' mt='5' mb='1' onChange={(e) => setTitle(e.target.value)} />
                     <Button onClick={() => onClickAddCard(properties._id, title)}>Add new card</Button>
 
@@ -96,4 +81,31 @@ export interface Section {
     _id: string
     title: string
     cards: Todo[]
+}
+
+
+interface CardListsProps {
+    properties: Section,
+    positionIndex: number,
+    onHoverSwapCard: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number) => void
+    onDropSwapCard: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
+    onClickDeleteCard: (sectionId: string, cardId: string) => void
+}
+
+function CardList({ properties, positionIndex, onHoverSwapCard, onDropSwapCard, onClickDeleteCard }: CardListsProps) {
+    return (
+        <Stack gap={1}>
+            {
+                properties.cards.map((card: Todo, index) => {
+                    return (
+                        <Card key={card._id} properties={card} positionIndex={index} sectionIndex={positionIndex}
+                            onHover={onHoverSwapCard}
+                            onDrop={onDropSwapCard}
+                            onDelete={() => onClickDeleteCard(properties._id, card._id)} />
+
+                    )
+                })
+            }
+        </Stack>
+    )
 }

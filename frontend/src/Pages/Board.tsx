@@ -107,6 +107,7 @@ export default function Board() {
   }
 
   function onClickDeleteCard(sectionId: string, cardId: string) {
+    console.log('deleing', )
     async function deleteCard() {
       const { data } = await api.deleteCard(BOARDID, sectionId, cardId);
       setSections(data.sections);
@@ -120,7 +121,8 @@ export default function Board() {
         {
           sections.length >= 0 && sections.map((section, index) => {
             return (
-              <Box w='250px' h='500px' key={section._id}>
+              <Box w='450px' key={section._id}>
+              {/* <Box w='450px' h='fit-content' key={section._id}> */}
                 <SectionComponent properties={section} positionIndex={index} handleDrop={handleDrop} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteSection={onClickDeleteSection} onClickAddCard={onClickAddCard} onClickDeleteCard={onClickDeleteCard} />
               </Box>
             )
