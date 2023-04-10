@@ -1,21 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Todo, NewTodo } from '../types/Todo';
 import * as api from '../api';
 import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input } from '@chakra-ui/react';
-import { useDrag, useDrop } from "react-dnd";
-import Card from '../Components/Board/Card';
 import SectionComponent, { Section } from '../Components/Board/Section';
-
-interface statusInfo {
-  sectionIndex: number
-  cardIndex: number
-}
 
 
 export default function Board() {
   const [sections, setSections] = useState<Section[]>([{ _id: 'A', title: 'Element', cards: [] }, { _id: 'B', title: 'Anime', cards: [] }])
   const [newSectionTitle, setNewSectionTitle] = useState('')
-  const [draggingCardInfo, setDraggingCardInfo] = useState<statusInfo | null>(null)
 
 
   const BOARDID = '64233d206555d18b2cbedd3d'
@@ -55,7 +46,6 @@ export default function Board() {
   //Card, index to place in, section to place in
   const onDropSwapCard = async (dragCardId: string, hoverIndex: number, sectionIndex: number) => {
 
-    setDraggingCardInfo(null)
     const { data } = await api.changeCardPosition(BOARDID, dragCardId, hoverIndex, sectionIndex)
     setSections(data.sections)
   }
