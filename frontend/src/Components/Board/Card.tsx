@@ -3,6 +3,8 @@ import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Inpu
 import { useDrag, useDrop, DragPreviewImage  } from "react-dnd";
 import { Todo } from '../../types/Todo';
 
+import { DeleteIcon } from '@chakra-ui/icons'
+
 interface XYCoord {
     x: number,
     y: number
@@ -23,6 +25,8 @@ export interface PassProp {
     index: number
     sectionIndex: number
 }
+
+
 
 export default function Card({ properties, positionIndex, sectionIndex, onHover, onDrop, onDelete }: CardProp) {
     const ref = useRef(null);
@@ -77,7 +81,7 @@ export default function Card({ properties, positionIndex, sectionIndex, onHover,
             <Flex justify='space-between' align={'center'}>
 
                 <Text as='span' color='white'>{properties.title}</Text>
-                <Button onClick={()=>onClick(onDelete)}>DELETE</Button>
+                <DeleteIcon onClick={()=>onClick(onDelete)} color='white' cursor={'pointer'}/>
             </Flex>
         </Box>
     );

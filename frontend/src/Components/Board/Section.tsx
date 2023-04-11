@@ -3,6 +3,7 @@ import { Flex, Button, Box, Heading, Input, Stack, Divider } from '@chakra-ui/re
 import { useDrop } from "react-dnd";
 import Card, { PassProp } from './Card';
 import { Todo } from '../../types/Todo';
+import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 
 
 interface SectionProps {
@@ -48,6 +49,7 @@ function DropSection({ positionIndex, handleDrop, children }: DropSectionProps) 
             bg="red.500"
             opacity={isOver ? 0.5 : 1}
             ref={drop}
+            rounded={'3xl'}
         >
             {children}
         </Box>
@@ -62,14 +64,20 @@ export default function SectionComponent({ properties, positionIndex, handleDrop
         <DropSection positionIndex={positionIndex} handleDrop={handleDrop}>
             <Flex direction='column' justify='space-between' h='full' p='3'>
                 <Box>
-                    <Heading as='h2' size={'lg'}>{properties.title}</Heading>
-                    <Divider my={5}/>
+                    <Flex gap='2' mt='5' mb='1' align='center'>
+
+                        <Heading as='h2' size={'lg'}>{properties.title}</Heading>
+                        <DeleteIcon onClick={() => onClickDeleteSection(properties._id)} mt='' color='white' />
+                    </Flex>
+                    <Divider my={5} />
                     <CardList properties={properties} positionIndex={positionIndex} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteCard={onClickDeleteCard} />
-                    <Input w='full' type="text" bg='white' mt='5' mb='1' onChange={(e) => setTitle(e.target.value)} />
-                    <Button onClick={() => onClickAddCard(properties._id, title)}>Add new card</Button>
+                    <Flex gap='2' mt='5' mb='1' align='center'>
+
+                        <Input type="text" bg='white' onChange={(e) => setTitle(e.target.value)} />
+                        <AddIcon onClick={() => onClickAddCard(properties._id, title)} color='white' />
+                    </Flex>
 
                 </Box>
-                <Button onClick={() => onClickDeleteSection(properties._id)} mt=''> Delete Section</Button>
             </Flex>
         </DropSection>
 

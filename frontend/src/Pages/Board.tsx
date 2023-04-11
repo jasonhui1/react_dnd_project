@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import * as api from '../api';
 import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input } from '@chakra-ui/react';
 import SectionComponent, { Section } from '../Components/Board/Section';
+import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 
 
 export default function Board() {
@@ -107,7 +108,7 @@ export default function Board() {
   }
 
   function onClickDeleteCard(sectionId: string, cardId: string) {
-    console.log('deleing', )
+    console.log('deleing',)
     async function deleteCard() {
       const { data } = await api.deleteCard(BOARDID, sectionId, cardId);
       setSections(data.sections);
@@ -121,19 +122,29 @@ export default function Board() {
         {
           sections.length >= 0 && sections.map((section, index) => {
             return (
-              <Box w='450px' key={section._id}>
-              {/* <Box w='450px' h='fit-content' key={section._id}> */}
+              <Box w='450px' key={section._id} >
+                {/* <Box w='450px' h='fit-content' key={section._id}> */}
                 <SectionComponent properties={section} positionIndex={index} handleDrop={handleDrop} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteSection={onClickDeleteSection} onClickAddCard={onClickAddCard} onClickDeleteCard={onClickDeleteCard} />
               </Box>
             )
           })
         }
+        {/* <Input w='min(200px,20%)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
 
-        <Input w='min(200px,20%)' type="text" bg='white' mt='5' mb='1' onChange={(e) => setNewSectionTitle(e.target.value)} />
-        <Button onClick={() => onClickAddSection(newSectionTitle)}> Add Section</Button>
+        <Button onClick={() => onClickAddSection(newSectionTitle)}> Add Section</Button> */}
+
 
       </Flex>
-    </Box>
+
+
+
+      <Box w='fit-content' bg='gray.300' p='5' my='5' mx='auto'>
+        <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
+          <Input w='min(200px)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
+          <AddIcon onClick={() => onClickAddSection(newSectionTitle)} color='black' />
+        </Flex>
+      </Box>
+    </Box >
 
   )
 }
