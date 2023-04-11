@@ -14,6 +14,7 @@ function App() {
         {/* <Route path='/' element={<TodoPage/>}/> */}
         {/* <Route path='/dnd' element={<DND/>}/> */}
         <Route path='/' element={<Board/>}/>
+        <Route path='/:id' element={<Board/>}/>
       </Routes>
     </DndProvider>
   );

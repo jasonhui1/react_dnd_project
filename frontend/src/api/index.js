@@ -16,6 +16,8 @@ API.interceptors.request.use((req) => {
 
 export const fetchBoard = ()=>API.get('/board')
 export const fetchBoardById = (id)=>API.get(`/board/${id}`)
+export const createBoard = (title)=>API.post(`/board`, {title:title})
+
 
 export const createSection = (boardId, title)=>API.post(`/board/${boardId}/section/`, {title:title})
 export const deleteSection = (boardId, sectionId)=>API.delete(`/board/${boardId}/section/${sectionId}`)
