@@ -3,7 +3,8 @@ import * as api from '../api';
 import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input, Divider, Stack } from '@chakra-ui/react';
 import SectionComponent, { Section } from '../Components/Board/Section';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import Sidebar from '../Components/Sidebar';
 
 
 export default function Board() {
@@ -13,7 +14,6 @@ export default function Board() {
 
   const { id = '64233d206555d18b2cbedd3d' } = useParams();
   //TODO
-  //1. Add new board, created by user, with a default section
   //6. Reorder code
 
   useEffect(() => {
@@ -57,69 +57,37 @@ export default function Board() {
     setSections(data.sections)
   }
 
-  // const swapCardPosition = (dragIndex: number, hoverIndex: number, sectionIndex: number) => {
-  //   //Update child
-  //   const childs = sections[sectionIndex].cards[dragIndex];
-  //   const updateChilds = sections[sectionIndex].cards.filter((_, index) => index !== dragIndex);
-  //   updateChilds.splice(hoverIndex, 0, childs);
-
-  //   //Update section
-  //   let newSection = [...sections]
-  //   newSection[sectionIndex] = { ...newSection[sectionIndex], cards: updateChilds }
-
-  //   setSections(newSection);
-  // };
 
   //When drop to a new section
-  //TODO: USe Change Section api
-  const handleDrop = (cardId: string, prevIndex: number, currentIndex: number) => {
+  const handleDrop = async (cardId: string, prevIndex: number, currentIndex: number) => {
 
     if (currentIndex === prevIndex) return;
 
-    async function changeCardSection() {
-      const { data } = await api.changeCardSection(id, cardId, prevIndex, currentIndex)
-      setSections(data.sections)
-    }
-    changeCardSection()
+    const { data } = await api.changeCardSection(id, cardId, prevIndex, currentIndex)
+    setSections(data.sections)
   };
 
 
-  function onClickAddSection(title: string) {
+  async function onClickAddSection(title: string) {
     //Add section to database -> get it
-    async function createSection() {
-      const { data } = await api.createSection(id, title);
-      console.log('data', data.sections)
-      setSections(data.sections);
-    }
-
-    createSection()
+    const { data } = await api.createSection(id, title);
+    setSections(data.sections);
   }
 
-  function onClickDeleteSection(sectionId: string) {
-    async function deleteSection() {
-      const { data } = await api.deleteSection(id, sectionId);
-      setSections(data.sections);
-    }
-    deleteSection()
+  async function onClickDeleteSection(sectionId: string) {
+    const { data } = await api.deleteSection(id, sectionId);
+    setSections(data.sections);
   }
 
-  function onClickAddCard(sectionId: string, title: string) {
+  async function onClickAddCard(sectionId: string, title: string) {
     //Add section to database -> get it
-    async function createCard() {
-      const { data } = await api.createCard(id, sectionId, title);
-      setSections(data.sections);
-    }
-
-    createCard()
+    const { data } = await api.createCard(id, sectionId, title);
+    setSections(data.sections);
   }
 
-  function onClickDeleteCard(sectionId: string, cardId: string) {
-    console.log('deleing',)
-    async function deleteCard() {
-      const { data } = await api.deleteCard(id, sectionId, cardId);
-      setSections(data.sections);
-    }
-    deleteCard()
+  async function onClickDeleteCard(sectionId: string, cardId: string) {
+    const { data } = await api.deleteCard(id, sectionId, cardId);
+    setSections(data.sections);
   }
 
   return (
@@ -163,51 +131,3 @@ export default function Board() {
   )
 }
 
-
-interface Board {
-  _id: string
-  title: string
-}
-
-function Sidebar() {
-
-  const [boards, setBoards] = useState<Board[]>()
-  const [title, setTitle] = useState('')
-
-  useEffect(() => {
-    async function fetchBoards() {
-      const { data } = await api.fetchBoard();
-      if (!data) {
-        console.log('fetchBoard fail')
-        return
-      }
-      console.log('boards', data)
-      setBoards(data)
-    }
-    fetchBoards()
-  }, [])
-
-  const onClickAdd = async () => {
-    const data = await api.createBoard(title)
-    console.log('data', data)
-  }
-
-
-  return (
-    <>
-      <Box p='2' bg={'gray.200'} h='calc(100vh)'>
-        <Heading textAlign={'center'}>Sidebar</Heading>
-        <Divider my='5' />
-        <Stack>
-          {boards && boards.map((board, index) => (
-            <Link to={`/${board._id}`}>{board.title}</Link>
-          ))}
-          <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
-            <Input w='min(200px)' type="text" bg='white' onChange={(e) => setTitle(e.target.value)} />
-            <AddIcon onClick={onClickAdd} color='black' />
-          </Flex>
-        </Stack>
-      </Box>
-    </>
-  )
-}
