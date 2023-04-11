@@ -78,10 +78,10 @@ export default function Card({ properties, positionIndex, sectionIndex, onHover,
     }
     return (
         <Box bg={isDragging?'gray.800':'blue.500'} w='max(200px,full)' px='5' py='2' rounded={'2xl'} opacity={isDragging ? 0.5 : 1} ref={ref}>
-            <Flex justify='space-between' align={'center'}>
+            <Flex align={'center'}>
 
                 <Text as='span' color='white'>{properties.title}</Text>
-                <DeleteIcon onClick={()=>onClick(onDelete)} color='white' cursor={'pointer'}/>
+                <DeleteIcon ml='auto' onClick={()=>onClick(onDelete)} color='white' cursor={'pointer'}/>
             </Flex>
         </Box>
     );

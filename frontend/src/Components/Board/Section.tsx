@@ -30,6 +30,8 @@ function DropSection({ positionIndex, handleDrop, children }: DropSectionProps) 
     const [{ isOver }, drop] = useDrop({
         accept: "todo",
         drop: (item: PassProp, monitor) => {
+            const didDrop = monitor.didDrop()
+            if(didDrop) return //Drop on cards already
 
             const { _id, sectionIndex } = item
             const prevSectionIndex = sectionIndex
@@ -43,16 +45,17 @@ function DropSection({ positionIndex, handleDrop, children }: DropSectionProps) 
 
 
     return (
-        <Box
-            w="full"
-            h="full"
-            bg="red.500"
-            opacity={isOver ? 0.5 : 1}
-            ref={drop}
-            rounded={'3xl'}
-        >
-            {children}
-        </Box>
+        <Flex direction='column' h='calc(100vh)' ref={drop}>
+
+            <Box
+                w="full"
+                bg="red.500"
+                opacity={isOver ? 0.5 : 1}
+                rounded={'3xl'}
+            >
+                {children}
+            </Box>
+        </Flex>
     );
 }
 
@@ -67,10 +70,11 @@ export default function SectionComponent({ properties, positionIndex, handleDrop
                     <Flex gap='2' mt='5' mb='1' align='center'>
 
                         <Heading as='h2' size={'lg'}>{properties.title}</Heading>
-                        <DeleteIcon onClick={() => onClickDeleteSection(properties._id)} mt='' color='white' />
+                        <DeleteIcon ml='auto' onClick={() => onClickDeleteSection(properties._id)} mt='' color='white' />
                     </Flex>
                     <Divider my={5} />
                     <CardList properties={properties} positionIndex={positionIndex} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteCard={onClickDeleteCard} />
+
                     <Flex gap='2' mt='5' mb='1' align='center'>
 
                         <Input type="text" bg='white' onChange={(e) => setTitle(e.target.value)} />

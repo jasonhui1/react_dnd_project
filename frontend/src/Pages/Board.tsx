@@ -11,7 +11,7 @@ export default function Board() {
   const [sections, setSections] = useState<Section[]>([{ _id: 'A', title: 'Element', cards: [] }, { _id: 'B', title: 'Anime', cards: [] }])
   const [newSectionTitle, setNewSectionTitle] = useState('')
 
-  const { id= '64233d206555d18b2cbedd3d' } = useParams();
+  const { id = '64233d206555d18b2cbedd3d' } = useParams();
   //TODO
   //1. Add new board, created by user, with a default section
   //6. Reorder code
@@ -74,13 +74,13 @@ export default function Board() {
   //TODO: USe Change Section api
   const handleDrop = (cardId: string, prevIndex: number, currentIndex: number) => {
 
-    // if (currentIndex === prevIndex) return;
+    if (currentIndex === prevIndex) return;
 
-    // async function changeCardSection() {
-    //   const { data } = await api.changeCardSection(id, cardId, prevIndex, currentIndex)
-    //   setSections(data.sections)
-    // }
-    // changeCardSection()
+    async function changeCardSection() {
+      const { data } = await api.changeCardSection(id, cardId, prevIndex, currentIndex)
+      setSections(data.sections)
+    }
+    changeCardSection()
   };
 
 
@@ -127,7 +127,7 @@ export default function Board() {
       <Flex gap='5'>
         <Sidebar />
         <Box>
-          <Heading>{title}</Heading>
+          <Heading textAlign={'center'}>{title}</Heading>
           <Divider my='5' />
           <Flex gap='3'>
             {
@@ -144,17 +144,17 @@ export default function Board() {
 
         <Button onClick={() => onClickAddSection(newSectionTitle)}> Add Section</Button> */}
 
+            <Box w='fit-content' bg='gray.300' p='5' my='5' mx='auto'>
+              <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
+                <Input w='min(200px)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
+                <AddIcon onClick={() => onClickAddSection(newSectionTitle)} color='black' />
+              </Flex>
+            </Box>
 
           </Flex>
 
 
 
-          <Box w='fit-content' bg='gray.300' p='5' my='5' mx='auto'>
-            <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
-              <Input w='min(200px)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
-              <AddIcon onClick={() => onClickAddSection(newSectionTitle)} color='black' />
-            </Flex>
-          </Box>
         </Box >
       </Flex>
     </>
@@ -196,7 +196,7 @@ function Sidebar() {
   return (
     <>
       <Box p='2' bg={'gray.200'} h='calc(100vh)'>
-        <Heading>Sidebar</Heading>
+        <Heading textAlign={'center'}>Sidebar</Heading>
         <Divider my='5' />
         <Stack>
           {boards && boards.map((board, index) => (
