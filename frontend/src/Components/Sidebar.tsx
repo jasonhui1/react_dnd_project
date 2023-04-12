@@ -1,38 +1,27 @@
 
 import React, { useState, useEffect } from 'react';
-import * as api from '../api';
-import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input, Divider, Stack } from '@chakra-ui/react';
+import { Flex, Box, Heading, Input, Divider, Stack } from '@chakra-ui/react';
 import { AddIcon } from '@chakra-ui/icons'
 import { Link } from 'react-router-dom';
+import { Board } from '../Pages/Board';
 
-
-interface Board {
-    _id: string
-    title: string
+interface SidebarProps {
+    boards: Board[]
+    onClickAdd: (title: string) => Promise<string>
 }
 
-export default function Sidebar() {
+export default function Sidebar({ boards, onClickAdd }: SidebarProps) {
 
-    const [boards, setBoards] = useState<Board[]>()
     const [title, setTitle] = useState('')
 
-    useEffect(() => {
-        async function fetchBoards() {
-            const { data } = await api.fetchBoard();
-            if (!data) {
-                console.log('fetchBoard fail')
-                return
-            }
-            console.log('boards', data)
-            setBoards(data)
+    const onClick = async () => {
+        const result = await onClickAdd(title)
+        console.log('result', result)
+        if (result === 'success') {
+            setTitle('')
         }
-        fetchBoards()
-    }, [])
-
-    const onClickAdd = async () => {
-        const data = await api.createBoard(title)
-        console.log('add board', data)
     }
+
 
     return (
         <>
@@ -47,8 +36,8 @@ export default function Sidebar() {
 
                     {/* Add new board */}
                     <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
-                        <Input w='min(200px)' type="text" bg='white' onChange={(e) => setTitle(e.target.value)} />
-                        <AddIcon onClick={onClickAdd} color='black' />
+                        <Input w='min(200px)' type="text" bg='white' onChange={(e) => setTitle(e.target.value)} value={title}/>
+                        <AddIcon onClick={()=>onClick()} color='black' />
                     </Flex>
                 </Stack>
             </Box>

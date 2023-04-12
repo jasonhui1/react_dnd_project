@@ -1,20 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, } from 'react';
 import * as api from '../api';
-import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input, Divider, Stack } from '@chakra-ui/react';
-import SectionComponent, { Section } from '../Components/Board/Section';
-import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
-import { useParams } from 'react-router-dom';
+import { Flex, Button, Box, Stack } from '@chakra-ui/react';
 import Sidebar from '../Components/Sidebar';
 
 import { GoogleLogin } from '@react-oauth/google';
 import { googleLogout } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom'
+import Board from '../Components/Board/Board';
 
+export interface Board {
+  _id: string
+  title: string
+}
 
 export default function Main() {
   const [isLogin, setIsLogin] = useState<boolean>(false);
-
-  const navigate = useNavigate()
+  const [boards, onClickAdd] = useQueryBoard()
 
   useEffect(() => {
     const user = localStorage.getItem('user')
@@ -32,13 +33,15 @@ export default function Main() {
     localStorage.clear();
     googleLogout()
     navigate(0)
-
   }
-  
+
+  const navigate = useNavigate()
+
+
   return (
     <>
       <Flex gap='5'>
-        <Sidebar />
+        {boards && <Sidebar boards={boards} onClickAdd={onClickAdd} />}
         <Stack>
           <Box my='5' w='fit-content' >
             {!isLogin ? (
@@ -51,136 +54,41 @@ export default function Main() {
               <Button onClick={logout}>LOGOUT</Button>
             )}
           </Box>
-          <Board/>
+          <Board />
         </Stack>
       </Flex>
     </>
   )
 }
 
-
-
-function Board() {
-  const [title, setTitle] = useState('')
-  const [sections, setSections] = useState<Section[]>([{ _id: 'A', title: 'Element', cards: [] }, { _id: 'B', title: 'Anime', cards: [] }])
-  const [newSectionTitle, setNewSectionTitle] = useState('')
-
-  const { id = '64233d206555d18b2cbedd3d' } = useParams();
-  //TODO
-  //6. Reorder code
+function useQueryBoard(): [Board[] | undefined, (title: string) => Promise<string>] {
+  const [boards, setBoards] = useState<Board[]>([])
 
   useEffect(() => {
-    async function fetchSections() {
-      const { data } = await api.fetchBoardById(id);
+    async function fetchBoards() {
+      const { data } = await api.fetchBoard();
       if (!data) {
-        console.log('board fetch from id fail')
+        console.log('fetchBoard fail')
         return
       }
-
-      setTitle(data.title)
-      setSections(data.sections);
+      setBoards(data)
     }
+    fetchBoards()
+  }, [])
 
-    fetchSections()
-  }, [id]);
+  const onClickAdd = async (title: string) => {
+    try {
+      const { data } = await api.createBoard(title)
+      const newBoard: Board = data
+      setBoards([...boards, newBoard])
+      return 'success'
 
-  // Move the position in the same section
-  //Not added to the database, as it is not certain yet and delay is more obvious
-  const onHoverSwapCard = (dragCardId: string, hoverIndex: number, dragSectionIndex: number, newSectionIndex: number) => {
+    } catch (error) {
+      console.log('error', error)
 
-    // Find previous indexes
-    const prevSectionIndex = sections.findIndex(section => section.cards.some(card => card._id === dragCardId))
-    const prevCardIndex = sections[prevSectionIndex].cards.findIndex(card => card._id === dragCardId)
-    const updateSections = [...sections]
+      return 'fail'
 
-    const card = sections[prevSectionIndex].cards[prevCardIndex];
-    // Update
-    updateSections[prevSectionIndex].cards = updateSections[prevSectionIndex].cards.filter(card => card._id !== dragCardId);
-    updateSections[newSectionIndex].cards.splice(hoverIndex, 0, card);
-
-    //Update section
-    setSections(updateSections);
-  };
-
-
-  //Card, index to place in, section to place in
-  const onDropSwapCard = async (dragCardId: string, hoverIndex: number, sectionIndex: number) => {
-
-    const { data } = await api.changeCardPosition(id, dragCardId, hoverIndex, sectionIndex)
-    setSections(data.sections)
+    }
   }
-
-
-  //When drop to a new section
-  const handleDrop = async (cardId: string, prevIndex: number, currentIndex: number) => {
-
-    if (currentIndex === prevIndex) return;
-
-    const { data } = await api.changeCardSection(id, cardId, prevIndex, currentIndex)
-    setSections(data.sections)
-  };
-
-
-  async function onClickAddSection(title: string) {
-    //Add section to database -> get it
-    const { data } = await api.createSection(id, title);
-    console.log('data', data)
-    setSections(data.sections);
-  }
-
-  async function onClickDeleteSection(sectionId: string) {
-    const { data } = await api.deleteSection(id, sectionId);
-    setSections(data.sections);
-  }
-
-  async function onClickAddCard(sectionId: string, title: string) {
-    //Add section to database -> get it
-    const { data } = await api.createCard(id, sectionId, title);
-    setSections(data.sections);
-  }
-
-  async function onClickDeleteCard(sectionId: string, cardId: string) {
-    const { data } = await api.deleteCard(id, sectionId, cardId);
-    setSections(data.sections);
-  }
-
-  return (
-    <>
-
-      <Box>
-        <Heading>{title}</Heading>
-        <Divider my='5' />
-        <Flex gap='3'>
-          {
-            sections.length >= 0 && sections.map((section, index) => {
-              return (
-                <Box w='450px' key={section._id} >
-                  {/* <Box w='450px' h='fit-content' key={section._id}> */}
-                  <SectionComponent properties={section} positionIndex={index} handleDrop={handleDrop} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteSection={onClickDeleteSection} onClickAddCard={onClickAddCard} onClickDeleteCard={onClickDeleteCard} />
-                </Box>
-              )
-            })
-          }
-          {/* <Input w='min(200px,20%)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
-
-        <Button onClick={() => onClickAddSection(newSectionTitle)}> Add Section</Button> */}
-
-          <Box w='fit-content' bg='gray.300' p='5' my='5' mx='auto'>
-            <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
-              <Input w='min(200px)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
-              <AddIcon onClick={() => onClickAddSection(newSectionTitle)} color='black' />
-            </Flex>
-          </Box>
-
-        </Flex>
-
-
-
-      </Box >
-
-    </>
-
-
-  )
+  return [boards, onClickAdd]
 }
-
