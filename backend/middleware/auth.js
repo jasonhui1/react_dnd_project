@@ -8,7 +8,7 @@ const auth = async (req, res, next) => {
         req.userId = decodedData?.sub;
         next();
     } catch (error) {
-        console.log(error);
+        console.log('UnAuthorised');
     }
 };
 

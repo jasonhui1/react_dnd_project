@@ -21,15 +21,6 @@ export const createSection = async (req, res) => {
     } catch (err) {
         res.status(500).json(err);
     }
-
-    Board.findByIdAndUpdate(boardId, { $push: { sections: newSection } }, { new: true })
-        .then(board => {
-            res.status(201).json(board);
-            // res.status(201).json(board.sections[board.sections.length - 1]);
-        })
-        .catch(error => {
-            res.status(500).json({ error: "Error adding new section" });
-        });
 };
 
 
@@ -87,14 +78,17 @@ export const patchCardSection = async (req, res) => {
         const document = await Board.findById(boardId).where('createdBy').equals(userId);
         if (!document) throw new Error(`No board found with id: ${boardId}`);
 
+        //Get card
         const cardIndex = document.sections[prevSectionIndex].cards.findIndex(card => card._id.toString() === cardId)
         let card = document.sections[prevSectionIndex].cards[cardIndex]
         card = card.toObject() //cannot push with existing _id
         delete card._id
 
+        //Swap
         document.sections[prevSectionIndex].cards.splice(cardIndex, 1)
         document.sections[newSectionIndex].cards.push(card)
 
+        // Save the updated document
         const updatedDocument = await document.save();
         res.status(200).json(updatedDocument)
     } catch (error) {
