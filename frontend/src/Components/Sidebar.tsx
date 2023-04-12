@@ -42,7 +42,7 @@ export default function Sidebar() {
 
                 <Stack>
                     {boards && boards.map((board) => (
-                        <Link to={`/${board._id}`}>{board.title}</Link>
+                        <Link to={`/${board._id}`} key={board._id}>{board.title}</Link>
                     ))}
 
                     {/* Add new board */}

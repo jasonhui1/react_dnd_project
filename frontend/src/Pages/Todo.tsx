@@ -2,11 +2,9 @@
 // import * as api from '../api';
 // import { GoogleLogin } from '@react-oauth/google';
 // import { googleLogout } from '@react-oauth/google';
-// import { useGoogleLogin } from '@react-oauth/google';
 // import { useNavigate } from 'react-router-dom'
 // import { Todo, NewTodo } from '../types/Todo';
 // import { Box, Text, Button, Checkbox, Flex, ListItem, OrderedList, Input, FormControl, Container, Divider } from '@chakra-ui/react';
-
 
 
 // export default function TodoPage() {

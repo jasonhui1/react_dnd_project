@@ -6,8 +6,9 @@ const router = express.Router();
 // Create a new board
 export const createBoard = async (req, res) => {
   const {title} = req.body
+  const userId = req.userId
   try {
-    const board = new Board({title:title});
+    const board = new Board({title:title, createdBy:userId});
     await board.save();
     res.status(201).send(board);
   } catch (error) {
@@ -17,8 +18,10 @@ export const createBoard = async (req, res) => {
 
 // Get all boards
 export  const getBoard = async (req, res) => {
+  const userId = req.userId
+
   try {
-    const boards = await Board.find({});
+    const boards = await Board.find({createdBy:userId});
     res.send(boards);
   } catch (error) {
     res.status(500).send(error);
@@ -28,8 +31,10 @@ export  const getBoard = async (req, res) => {
 // // Get a board by ID
 export  const getBoardById = async (req, res) => {
   const {id} = req.params.id
+  const userId = req.userId
+
   try {
-    const board = await Board.findById(req.params.id);
+    const board = await Board.findById(req.params.id).where('createdBy').equals(userId);
     if (!board) {
       return res.status(404).send();
     }

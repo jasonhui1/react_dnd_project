@@ -16,11 +16,14 @@ const SectionSchema = new mongoose.Schema({
 });
 
 const BoardSchema = new mongoose.Schema({
-  title:{
+  title: {
     type: String,
     required: true,
   },
-  sections: [SectionSchema]
+  sections: [SectionSchema],
+  createdBy: {
+    type: String
+  }
 });
 
 

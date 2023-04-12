@@ -6,8 +6,61 @@ import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import { useParams } from 'react-router-dom';
 import Sidebar from '../Components/Sidebar';
 
+import { GoogleLogin } from '@react-oauth/google';
+import { googleLogout } from '@react-oauth/google';
+import { useNavigate } from 'react-router-dom'
 
-export default function Board() {
+
+export default function Main() {
+  const [isLogin, setIsLogin] = useState<boolean>(false);
+
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const user = localStorage.getItem('user')
+    if (!!user) {
+      setIsLogin(true)
+    }
+  }, [isLogin]);
+
+  const responseGoogle = (response: any) => {
+    localStorage.setItem('user', JSON.stringify(response));
+    navigate(0)
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    googleLogout()
+    navigate(0)
+
+  }
+  
+  return (
+    <>
+      <Flex gap='5'>
+        <Sidebar />
+        <Stack>
+          <Box my='5' w='fit-content' >
+            {!isLogin ? (
+              <GoogleLogin
+                onSuccess={responseGoogle}
+                onError={() => {
+                  console.log('Login Failed');
+                }}
+              />) : (
+              <Button onClick={logout}>LOGOUT</Button>
+            )}
+          </Box>
+          <Board/>
+        </Stack>
+      </Flex>
+    </>
+  )
+}
+
+
+
+function Board() {
   const [title, setTitle] = useState('')
   const [sections, setSections] = useState<Section[]>([{ _id: 'A', title: 'Element', cards: [] }, { _id: 'B', title: 'Anime', cards: [] }])
   const [newSectionTitle, setNewSectionTitle] = useState('')
@@ -92,39 +145,38 @@ export default function Board() {
 
   return (
     <>
-      <Flex gap='5'>
-        <Sidebar />
-        <Box>
-          <Heading textAlign={'center'}>{title}</Heading>
-          <Divider my='5' />
-          <Flex gap='3'>
-            {
-              sections.length >= 0 && sections.map((section, index) => {
-                return (
-                  <Box w='450px' key={section._id} >
-                    {/* <Box w='450px' h='fit-content' key={section._id}> */}
-                    <SectionComponent properties={section} positionIndex={index} handleDrop={handleDrop} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteSection={onClickDeleteSection} onClickAddCard={onClickAddCard} onClickDeleteCard={onClickDeleteCard} />
-                  </Box>
-                )
-              })
-            }
-            {/* <Input w='min(200px,20%)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
+
+      <Box>
+        <Heading>{title}</Heading>
+        <Divider my='5' />
+        <Flex gap='3'>
+          {
+            sections.length >= 0 && sections.map((section, index) => {
+              return (
+                <Box w='450px' key={section._id} >
+                  {/* <Box w='450px' h='fit-content' key={section._id}> */}
+                  <SectionComponent properties={section} positionIndex={index} handleDrop={handleDrop} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteSection={onClickDeleteSection} onClickAddCard={onClickAddCard} onClickDeleteCard={onClickDeleteCard} />
+                </Box>
+              )
+            })
+          }
+          {/* <Input w='min(200px,20%)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
 
         <Button onClick={() => onClickAddSection(newSectionTitle)}> Add Section</Button> */}
 
-            <Box w='fit-content' bg='gray.300' p='5' my='5' mx='auto'>
-              <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
-                <Input w='min(200px)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
-                <AddIcon onClick={() => onClickAddSection(newSectionTitle)} color='black' />
-              </Flex>
-            </Box>
+          <Box w='fit-content' bg='gray.300' p='5' my='5' mx='auto'>
+            <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
+              <Input w='min(200px)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
+              <AddIcon onClick={() => onClickAddSection(newSectionTitle)} color='black' />
+            </Flex>
+          </Box>
 
-          </Flex>
+        </Flex>
 
 
 
-        </Box >
-      </Flex>
+      </Box >
+
     </>
 
 
