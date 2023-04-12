@@ -30,11 +30,11 @@ export  const getBoard = async (req, res) => {
 
 // // Get a board by ID
 export  const getBoardById = async (req, res) => {
-  const {id} = req.params.id
+  const {id} = req.params
   const userId = req.userId
 
   try {
-    const board = await Board.findById(req.params.id).where('createdBy').equals(userId);
+    const board = await Board.findById(id).where('createdBy').equals(userId);
     if (!board) {
       return res.status(404).send();
     }
@@ -71,8 +71,10 @@ export  const getBoardById = async (req, res) => {
 // Delete a board by ID
 export const deleteBoard =  async (req, res) => {
   const {id} = req.params
+  const userId = req.userId
+
   try {
-    const board = await Board.findByIdAndDelete(id);
+    const board = await Board.findByIdAndDelete(id).where('createdBy').equals(userId);
     if (!board) {
       return res.status(404).send();
     }

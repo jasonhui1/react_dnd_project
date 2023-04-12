@@ -124,6 +124,7 @@ function Board() {
   async function onClickAddSection(title: string) {
     //Add section to database -> get it
     const { data } = await api.createSection(id, title);
+    console.log('data', data)
     setSections(data.sections);
   }
 

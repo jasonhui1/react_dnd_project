@@ -4,10 +4,23 @@ import { Board } from '../models/board.js';
 export const createSection = async (req, res) => {
     const { boardId } = req.params;
     const { title } = req.body;
+    const userId = req.userId
+
     const newSection = {
         title: title,
         cards: [] // initialize with empty array of cards
     };
+
+    try {
+        const board = await Board.findOneAndUpdate(
+            { _id: boardId, createdBy: userId },
+            { $push: { sections: newSection } },
+            { new: true }
+        );
+        res.status(201).json(board);
+    } catch (err) {
+        res.status(500).json(err);
+    }
 
     Board.findByIdAndUpdate(boardId, { $push: { sections: newSection } }, { new: true })
         .then(board => {
@@ -23,34 +36,44 @@ export const createSection = async (req, res) => {
 // '/boards/:boardId/sections/:sectionId'
 export const deleteSection = async (req, res) => {
     const { boardId, sectionId } = req.params;
+    const userId = req.userId
 
-    Board.findByIdAndUpdate(boardId, { $pull: { sections: { _id: sectionId } } }, { new: true })
-        .then((board) => {
-            res.status(200).json(board);
-        })
-        .catch(error => {
-            res.status(500).json({ error: "Error deleting section" });
-        });
+    try {
+        const board = await Board.findOneAndUpdate(
+            { _id: boardId, createdBy: userId },
+            { $pull: { sections: { _id: sectionId } } },
+            { new: true }
+        );
+
+        res.status(200).json(board);
+    } catch (err) {
+        res.status(500).json({ error: "Error deleting section" });
+    }
 };
 
 // '/boards/:boardId/sections/:sectionId'
 export const patchSection = async (req, res) => {
     const { boardId, sectionId } = req.params;
     const { title } = req.body;
+    const userId = req.userId
+
     const update = {
         $set: {
             "sections.$.title": title
         }
     };
 
-    Board.findOneAndUpdate({ _id: boardId, "sections._id": sectionId }, update, { new: true })
-        .then(board => {
-            const section = board.sections.find(s => s._id.toString() === sectionId);
-            res.status(200).json(section);
-        })
-        .catch(error => {
-            res.status(500).json({ error: "Error updating section" });
-        });
+    try {
+        const board = await Board.findOneAndUpdate(
+            { _id: boardId, createdBy: userId, "sections._id": sectionId },
+            update,
+            { new: true }
+        );
+
+        res.status(200).json(board);
+    } catch (err) {
+        res.status(500).json({ error: "Error patching section" });
+    }
 };
 
 
@@ -58,9 +81,10 @@ export const patchSection = async (req, res) => {
 export const patchCardSection = async (req, res) => {
     const { boardId } = req.params;
     const { cardId, prevSectionIndex, newSectionIndex } = req.body;
+    const userId = req.userId
 
     try {
-        const document = await Board.findById(boardId);
+        const document = await Board.findById(boardId).where('createdBy').equals(userId);
         if (!document) throw new Error(`No board found with id: ${boardId}`);
 
         const cardIndex = document.sections[prevSectionIndex].cards.findIndex(card => card._id.toString() === cardId)
@@ -83,9 +107,10 @@ export const swapCard = async (req, res) => {
 
     const { boardId } = req.params;
     const { cardId, newIndex, sectionIndex } = req.body;
+    const userId = req.userId
 
     try {
-        const document = await Board.findById(boardId);
+        const document = await Board.findById(boardId).where('createdBy').equals(userId);
         if (!document) throw new Error(`No document found with id: ${boardId}`);
         // if (document.sections[section_id].length <= index1 || document.childs.length <= index2) throw new Error(`index exceeds length`);
 

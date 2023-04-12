@@ -4,9 +4,10 @@ import { Board } from '../models/board.js';
 export const createCard = async (req, res) => {
   const { boardId, sectionId } = req.params;
   const { title } = req.body;
+  const userId = req.userId
 
   try {
-    const board = await Board.findById(boardId);
+    const board = await Board.findById(boardId).where('createdBy').equals(userId);
     const section = board.sections.id(sectionId);
 
     const newCard = {
@@ -28,22 +29,14 @@ export const createCard = async (req, res) => {
 //'/boards/:boardId/sections/:sectionId/cards/:cardId'
 export const deleteCard = async (req, res) => {
   const { boardId, sectionId, cardId } = req.params;
-  console.log(boardId,sectionId,cardId)
+  const userId = req.userId
 
   try {
-    // const result = await Board.findByIdAndUpdate(
-    //   boardId,
-    //   { $pull: { [`sections.${sectionId}.cards`]: { _id: cardId } } },
-    //   { new: true }
-    // );
-
     const result = await Board.findOneAndUpdate(
-      boardId,
+      {_id:boardId, createdBy:userId},
       { $pull: { 'sections.$[].cards': { _id: cardId } } },
       { new: true }
     );
-
-    console.log('result', result)
 
     res.status(200).json(result);
   } catch (err) {
@@ -56,9 +49,11 @@ export const deleteCard = async (req, res) => {
 export const patchCard = async (req, res) => {
   const { boardId, sectionId, cardId } = req.params;
   const {title} = req.body
+  const userId = req.userId
+
 
   try {
-    const board = await Board.findById(boardId);
+    const board = await Board.findById(boardId).where('createdBy').equals(userId);
     const section = board.sections.id(sectionId);
     const card = section.cards.id(cardId);
 
