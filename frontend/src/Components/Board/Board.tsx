@@ -1,13 +1,10 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import * as api from '../../api';
 import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input, Divider, Stack } from '@chakra-ui/react';
 import SectionComponent, { Section } from '../Board/Section';
-import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import { useParams } from 'react-router-dom';
 import { BoardContextProvider } from '../../context/board';
 import AddButton from '../AddButton';
-
-
 
 export default function Board() {
   const [title, setTitle] = useState('')
@@ -73,7 +70,6 @@ export default function Board() {
   async function onClickAddSection(title: string) {
     //Add section to database -> get it
     const { data } = await api.createSection(id, title);
-    console.log('data', data)
     setSections(data.sections);
   }
 
@@ -107,24 +103,13 @@ export default function Board() {
         <Heading>{title}</Heading>
         <Divider my='5' />
         <Flex gap='3'>
-          {
-            sections.length >= 0 && sections.map((section, index) => {
-              return (
-                <Box w='450px' key={section._id} >
-                  {/* <Box w='450px' h='fit-content' key={section._id}> */}
-                  <SectionComponent properties={section} positionIndex={index} />
-                </Box>
-              )
-            })
-          }
-          {/* <Input w='min(200px,20%)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
-  
-          <Button onClick={() => onClickAddSection(newSectionTitle)}> Add Section</Button> */}
+          <SectionList sections={sections} />
 
+          {/* ADD sections form */}
           <Box w='fit-content' bg='gray.300' p='5' my='5' mx='auto'>
             <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
               <Input w='min(200px)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
-              <AddButton onClick={() => onClickAddSection(newSectionTitle)}/>
+              <AddButton onClick={() => onClickAddSection(newSectionTitle)} />
             </Flex>
           </Box>
 
@@ -137,5 +122,25 @@ export default function Board() {
     </BoardContextProvider>
 
 
+  )
+}
+
+interface SectionListsProps {
+  sections: Section[]
+}
+
+function SectionList({ sections }: SectionListsProps) {
+  return (
+    <>
+      {
+        sections.map((section, index) => {
+          return (
+            <Box w='450px' key={section._id} >
+              <SectionComponent properties={section} positionIndex={index} />
+            </Box>
+          )
+        })
+      }
+    </>
   )
 }

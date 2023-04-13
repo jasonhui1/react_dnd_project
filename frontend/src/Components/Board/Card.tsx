@@ -3,9 +3,9 @@ import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Inpu
 import { useDrag, useDrop, DragPreviewImage } from "react-dnd";
 import { Todo } from '../../types/Todo';
 
-import { DeleteIcon } from '@chakra-ui/icons'
 import { useBoardContext } from '../../context/board';
 import DeleteButton from '../DeleteButton';
+import { ItemTypes } from '../../types/ItemType';
 
 interface XYCoord {
     x: number,
@@ -26,15 +26,13 @@ export interface PassProp {
     sectionIndex: number
 }
 
-
-
 export default function Card({ properties, positionIndex, sectionIndex, onDelete }: CardProp) {
     const ref = useRef(null);
     const { onHoverSwapCard, onDropSwapCard } = useBoardContext();
 
-    //Drop to todos that are in the same section
+    //Drop the card on the card that is in the same section
     const [_, drop] = useDrop({
-        accept: "todo",
+        accept: ItemTypes.CARD,
         hover(item: PassProp, monitor) {
             if (!ref.current) return
 

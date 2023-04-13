@@ -3,10 +3,10 @@ import { Flex, Button, Box, Heading, Input, Stack, Divider } from '@chakra-ui/re
 import { useDrop } from "react-dnd";
 import Card, { PassProp } from './Card';
 import { Todo } from '../../types/Todo';
-import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import { useBoardContext } from '../../context/board';
 import DeleteButton from '../DeleteButton';
 import AddButton from '../AddButton';
+import { ItemTypes } from '../../types/ItemType';
 
 export interface Section {
     _id: string
@@ -25,7 +25,7 @@ function DropSection({ positionIndex, children }: DropSectionProps) {
 
     //Drop to the section->Add it
     const [{ isOver }, drop] = useDrop({
-        accept: "todo",
+        accept: ItemTypes.CARD,
         drop: (item: PassProp, monitor) => {
             const didDrop = monitor.didDrop()
             if (didDrop) return //Drop on cards already
@@ -77,7 +77,7 @@ export default function SectionComponent({ properties, positionIndex }: SectionP
 
                     </Flex>
                     <Divider my={5} />
-                    <CardList properties={properties} positionIndex={positionIndex} />
+                    <CardList section={properties} positionIndex={positionIndex} />
 
                     <Flex gap='2' mt='5' mb='1' align='center'>
 
@@ -95,20 +95,20 @@ export default function SectionComponent({ properties, positionIndex }: SectionP
 }
 
 interface CardListsProps {
-    properties: Section,
+    section: Section,
     positionIndex: number,
 }
 
-function CardList({ properties, positionIndex }: CardListsProps) {
+function CardList({ section, positionIndex }: CardListsProps) {
     const { onClickDeleteCard } = useBoardContext();
 
     return (
         <Stack gap={1}>
             {
-                properties.cards.map((card: Todo, index) => {
+                section.cards.map((card: Todo, index) => {
                     return (
                         <Card key={card._id} properties={card} positionIndex={index} sectionIndex={positionIndex}
-                            onDelete={() => onClickDeleteCard(properties._id, card._id)} />
+                            onDelete={() => onClickDeleteCard(section._id, card._id)} />
 
                     )
                 })
