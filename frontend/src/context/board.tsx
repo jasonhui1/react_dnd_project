@@ -1,9 +1,9 @@
 import { createContext, useContext } from 'react';
 
 interface BoardProps {
-    handleDrop: (_id: string, prevSectionIndex: number, index: number,) => void
-    onHoverSwapCard: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number) => void
-    onDropSwapCard: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
+    onHoverSwapCard: (cardId: string, newIndex: number, newSectionIndex: number) => void
+    onDropSwapCardPosition: (cardId: string, newPositionIndex: number, currentSectionIndex: number) => void
+    onDropSwapCardSection: (cardId: string, prevSectionIndex: number, currentSectionIndex: number)  => void
     onClickDeleteSection: (id: string) => void
     onClickAddCard: (sectionId: string, title: string) => void
     onClickDeleteCard: (sectionId: string, cardId: string) => void
@@ -11,9 +11,9 @@ interface BoardProps {
 
 // Create the context
 const BoardContext = createContext<BoardProps>({
-    handleDrop: () => { },
     onHoverSwapCard: () => { },
-    onDropSwapCard: () => { },
+    onDropSwapCardPosition: () => { },
+    onDropSwapCardSection: () => { },
     onClickDeleteSection: () => { },
     onClickAddCard: () => { },
     onClickDeleteCard: () => { },
@@ -24,14 +24,13 @@ interface Props extends BoardProps {
 }
 
 // Define the provider component
-export const BoardContextProvider = ({ handleDrop, onHoverSwapCard, onDropSwapCard, onClickDeleteSection, onClickAddCard, onClickDeleteCard, children }: Props) => {
-
+export const BoardContextProvider = ({onHoverSwapCard, onDropSwapCardPosition, onDropSwapCardSection, onClickDeleteSection, onClickAddCard, onClickDeleteCard, children }: Props) => {
 
     // Pass all the functions in the context value object
     const contextValue = {
-        handleDrop,
         onHoverSwapCard,
-        onDropSwapCard,
+        onDropSwapCardPosition,
+        onDropSwapCardSection,
         onClickDeleteSection,
         onClickAddCard,
         onClickDeleteCard,

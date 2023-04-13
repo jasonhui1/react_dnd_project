@@ -28,7 +28,7 @@ export interface PassProp {
 
 export default function Card({ properties, positionIndex, sectionIndex, onDelete }: CardProp) {
     const ref = useRef(null);
-    const { onHoverSwapCard, onDropSwapCard } = useBoardContext();
+    const { onHoverSwapCard, onDropSwapCardPosition } = useBoardContext();
 
     //Drop the card on the card that is in the same section
     const [_, drop] = useDrop({
@@ -53,17 +53,17 @@ export default function Card({ properties, positionIndex, sectionIndex, onDelete
                 //drag is above but less than middle
                 if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
 
-                onHoverSwapCard(item._id, hoverIndex, item.sectionIndex, sectionIndex);
+                onHoverSwapCard(item._id, hoverIndex, sectionIndex);
                 item.index = hoverIndex;
             }
         },
         drop: (item: PassProp, monitor) => {
-            onDropSwapCard(item._id, item.index, sectionIndex)
+            onDropSwapCardPosition(item._id, item.index, sectionIndex)
         },
     });
 
     const [{ isDragging }, drag] = useDrag({
-        type: "todo",
+        type: ItemTypes.CARD,
         item: { _id: properties._id, index: positionIndex, sectionIndex: sectionIndex },
         collect: (monitor) => ({
             isDragging: monitor.isDragging(),

@@ -5,7 +5,6 @@ import Card, { PassProp } from './Card';
 import { Todo } from '../../types/Todo';
 import { useBoardContext } from '../../context/board';
 import DeleteButton from '../DeleteButton';
-import AddButton from '../AddButton';
 import { ItemTypes } from '../../types/ItemType';
 import AddForm from '../AddForm';
 
@@ -22,7 +21,7 @@ interface DropSectionProps {
 
 function DropSection({ positionIndex, children }: DropSectionProps) {
 
-    const { handleDrop } = useBoardContext();
+    const { onDropSwapCardSection } = useBoardContext();
 
     //Drop to the section->Add it
     const [{ isOver }, drop] = useDrop({
@@ -33,7 +32,7 @@ function DropSection({ positionIndex, children }: DropSectionProps) {
 
             const { _id, sectionIndex } = item
             const prevSectionIndex = sectionIndex
-            handleDrop(_id, prevSectionIndex, positionIndex,)
+            onDropSwapCardSection(_id, prevSectionIndex, positionIndex,)
 
         },
         collect: (monitor) => ({

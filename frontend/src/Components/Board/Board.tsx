@@ -4,7 +4,6 @@ import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Inpu
 import SectionComponent, { Section } from '../Board/Section';
 import { useParams } from 'react-router-dom';
 import { BoardContextProvider } from '../../context/board';
-import AddButton from '../AddButton';
 import AddForm from '../AddForm';
 
 export default function Board() {
@@ -33,17 +32,16 @@ export default function Board() {
 
   // Move the position in the same section
   //Not added to the database, as it is not certain yet and delay is more obvious
-  const onHoverSwapCard = (dragCardId: string, hoverIndex: number, dragSectionIndex: number, newSectionIndex: number) => {
-
+  const onHoverSwapCard = (cardId: string, newIndex: number, newSectionIndex: number) => {
     // Find previous indexes
-    const prevSectionIndex = sections.findIndex(section => section.cards.some(card => card._id === dragCardId))
-    const prevCardIndex = sections[prevSectionIndex].cards.findIndex(card => card._id === dragCardId)
+    const prevSectionIndex = sections.findIndex(section => section.cards.some(card => card._id === cardId))
+    const prevCardIndex = sections[prevSectionIndex].cards.findIndex(card => card._id === cardId)
     const updateSections = [...sections]
 
     const card = sections[prevSectionIndex].cards[prevCardIndex];
     // Update
-    updateSections[prevSectionIndex].cards = updateSections[prevSectionIndex].cards.filter(card => card._id !== dragCardId);
-    updateSections[newSectionIndex].cards.splice(hoverIndex, 0, card);
+    updateSections[prevSectionIndex].cards = updateSections[prevSectionIndex].cards.filter(card => card._id !== cardId);
+    updateSections[newSectionIndex].cards.splice(newIndex, 0, card);
 
     //Update section
     setSections(updateSections);
@@ -51,19 +49,19 @@ export default function Board() {
 
 
   //Card, index to place in, section to place in
-  const onDropSwapCard = async (dragCardId: string, hoverIndex: number, sectionIndex: number) => {
+  const onDropSwapCardPosition = async (cardId: string, newPositionIndex: number, currentSectionIndex: number) => {
 
-    const { data } = await api.changeCardPosition(id, dragCardId, hoverIndex, sectionIndex)
+    const { data } = await api.changeCardPosition(id, cardId, newPositionIndex, currentSectionIndex)
     setSections(data.sections)
   }
 
 
   //When drop to a new section
-  const handleDrop = async (cardId: string, prevIndex: number, currentIndex: number) => {
+  const onDropSwapCardSection = async (cardId: string, prevSectionIndex: number, currentSectionIndex: number) => {
 
-    if (currentIndex === prevIndex) return;
+    if (currentSectionIndex === prevSectionIndex) return;
 
-    const { data } = await api.changeCardSection(id, cardId, prevIndex, currentIndex)
+    const { data } = await api.changeCardSection(id, cardId, prevSectionIndex, currentSectionIndex)
     setSections(data.sections)
   };
 
@@ -92,9 +90,9 @@ export default function Board() {
 
   return (
     <BoardContextProvider
-      handleDrop={handleDrop}
       onHoverSwapCard={onHoverSwapCard}
-      onDropSwapCard={onDropSwapCard}
+      onDropSwapCardPosition={onDropSwapCardPosition}
+      onDropSwapCardSection={onDropSwapCardSection}
       onClickDeleteSection={onClickDeleteSection}
       onClickAddCard={onClickAddCard}
       onClickDeleteCard={onClickDeleteCard}
