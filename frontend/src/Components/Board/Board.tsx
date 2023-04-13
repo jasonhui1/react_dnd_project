@@ -5,6 +5,7 @@ import SectionComponent, { Section } from '../Board/Section';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import { useParams } from 'react-router-dom';
 import { BoardContextProvider } from '../../context/board';
+import AddButton from '../AddButton';
 
 
 
@@ -123,7 +124,7 @@ export default function Board() {
           <Box w='fit-content' bg='gray.300' p='5' my='5' mx='auto'>
             <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
               <Input w='min(200px)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
-              <AddIcon onClick={() => onClickAddSection(newSectionTitle)} color='black' />
+              <AddButton onClick={() => onClickAddSection(newSectionTitle)}/>
             </Flex>
           </Box>
 
