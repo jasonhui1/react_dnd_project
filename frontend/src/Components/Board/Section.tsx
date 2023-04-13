@@ -7,6 +7,7 @@ import { useBoardContext } from '../../context/board';
 import DeleteButton from '../DeleteButton';
 import AddButton from '../AddButton';
 import { ItemTypes } from '../../types/ItemType';
+import AddForm from '../AddForm';
 
 export interface Section {
     _id: string
@@ -79,12 +80,7 @@ export default function SectionComponent({ properties, positionIndex }: SectionP
                     <Divider my={5} />
                     <CardList section={properties} positionIndex={positionIndex} />
 
-                    <Flex gap='2' mt='5' mb='1' align='center'>
-
-                        <Input type="text" bg='white' onChange={(e) => setTitle(e.target.value)} />
-                        <AddButton onClick={() => onClickAddCard(properties._id, title)} />
-
-                    </Flex>
+                    <AddForm setState={setTitle} onClick={() => onClickAddCard(properties._id, title)} />
 
                 </Box>
             </Flex>

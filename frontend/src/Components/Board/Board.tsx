@@ -5,6 +5,7 @@ import SectionComponent, { Section } from '../Board/Section';
 import { useParams } from 'react-router-dom';
 import { BoardContextProvider } from '../../context/board';
 import AddButton from '../AddButton';
+import AddForm from '../AddForm';
 
 export default function Board() {
   const [title, setTitle] = useState('')
@@ -107,21 +108,13 @@ export default function Board() {
 
           {/* ADD sections form */}
           <Box w='fit-content' bg='gray.300' p='5' my='5' mx='auto'>
-            <Flex gap='2' mt='5' mb='1' align='center' justify={'center'}>
-              <Input w='min(200px)' type="text" bg='white' onChange={(e) => setNewSectionTitle(e.target.value)} />
-              <AddButton onClick={() => onClickAddSection(newSectionTitle)} />
-            </Flex>
+            <AddForm setState={setNewSectionTitle} onClick={() => onClickAddSection(newSectionTitle)} />
           </Box>
 
         </Flex>
-
-
-
       </Box >
 
     </BoardContextProvider>
-
-
   )
 }
 
