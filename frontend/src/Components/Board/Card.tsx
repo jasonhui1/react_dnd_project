@@ -1,10 +1,11 @@
 import React, { useRef } from 'react';
 import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input } from '@chakra-ui/react';
-import { useDrag, useDrop, DragPreviewImage  } from "react-dnd";
+import { useDrag, useDrop, DragPreviewImage } from "react-dnd";
 import { Todo } from '../../types/Todo';
 
 import { DeleteIcon } from '@chakra-ui/icons'
 import { useBoardContext } from '../../context/board';
+import DeleteButton from '../DeleteButton';
 
 interface XYCoord {
     x: number,
@@ -27,9 +28,9 @@ export interface PassProp {
 
 
 
-export default function Card({ properties, positionIndex, sectionIndex, onDelete}: CardProp) {
+export default function Card({ properties, positionIndex, sectionIndex, onDelete }: CardProp) {
     const ref = useRef(null);
-    const {onHoverSwapCard, onDropSwapCard} = useBoardContext();
+    const { onHoverSwapCard, onDropSwapCard } = useBoardContext();
 
     //Drop to todos that are in the same section
     const [_, drop] = useDrop({
@@ -73,15 +74,15 @@ export default function Card({ properties, positionIndex, sectionIndex, onDelete
 
     drag(drop(ref));
 
-    const onClick = (f:any) => {
+    const onClick = (f: any) => {
         f()
     }
     return (
-        <Box bg={isDragging?'gray.800':'blue.500'} w='max(200px,full)' px='5' py='2' rounded={'2xl'} opacity={isDragging ? 0.5 : 1} ref={ref}>
+        <Box bg={isDragging ? 'gray.800' : 'blue.500'} w='max(200px,full)' px='5' py='2' rounded={'2xl'} opacity={isDragging ? 0.5 : 1} ref={ref}>
             <Flex align={'center'}>
 
                 <Text as='span' color='white'>{properties.title}</Text>
-                <DeleteIcon ml='auto' onClick={()=>onClick(onDelete)} color='white' cursor={'pointer'}/>
+                <DeleteButton onClick={()=>onClick(onDelete)} />
             </Flex>
         </Box>
     );

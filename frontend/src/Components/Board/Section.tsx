@@ -5,11 +5,12 @@ import Card, { PassProp } from './Card';
 import { Todo } from '../../types/Todo';
 import { AddIcon, DeleteIcon } from '@chakra-ui/icons'
 import { useBoardContext } from '../../context/board';
+import DeleteButton from '../DeleteButton';
 
-
-interface SectionProps {
-    properties: Section,
-    positionIndex: number,
+export interface Section {
+    _id: string
+    title: string
+    cards: Todo[]
 }
 
 interface DropSectionProps {
@@ -54,10 +55,15 @@ function DropSection({ positionIndex, children }: DropSectionProps) {
     );
 }
 
+interface SectionProps {
+    properties: Section,
+    positionIndex: number,
+}
+
 export default function SectionComponent({ properties, positionIndex }: SectionProps) {
 
     const [title, setTitle] = useState('')
-    const {onClickDeleteSection, onClickAddCard} = useBoardContext();
+    const { onClickDeleteSection, onClickAddCard } = useBoardContext();
 
     return (
         <DropSection positionIndex={positionIndex}>
@@ -66,10 +72,11 @@ export default function SectionComponent({ properties, positionIndex }: SectionP
                     <Flex gap='2' mt='5' mb='1' align='center'>
 
                         <Heading as='h2' size={'lg'}>{properties.title}</Heading>
-                        <DeleteIcon ml='auto' onClick={() => onClickDeleteSection(properties._id)} mt='' color='white' />
+                        <DeleteButton onClick={() => onClickDeleteSection(properties._id)} />
+
                     </Flex>
                     <Divider my={5} />
-                    <CardList properties={properties} positionIndex={positionIndex}/>
+                    <CardList properties={properties} positionIndex={positionIndex} />
 
                     <Flex gap='2' mt='5' mb='1' align='center'>
 
@@ -85,20 +92,13 @@ export default function SectionComponent({ properties, positionIndex }: SectionP
     );
 }
 
-export interface Section {
-    _id: string
-    title: string
-    cards: Todo[]
-}
-
-
 interface CardListsProps {
     properties: Section,
     positionIndex: number,
 }
 
-function CardList({ properties, positionIndex}: CardListsProps) {
-    const {onClickDeleteCard } = useBoardContext();
+function CardList({ properties, positionIndex }: CardListsProps) {
+    const { onClickDeleteCard } = useBoardContext();
 
     return (
         <Stack gap={1}>
