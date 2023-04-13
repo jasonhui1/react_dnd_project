@@ -4,6 +4,7 @@ import { useDrag, useDrop, DragPreviewImage  } from "react-dnd";
 import { Todo } from '../../types/Todo';
 
 import { DeleteIcon } from '@chakra-ui/icons'
+import { useBoardContext } from '../../context/board';
 
 interface XYCoord {
     x: number,
@@ -14,8 +15,6 @@ interface CardProp {
     properties: Todo
     positionIndex: number //Index in the section
     sectionIndex: number
-    onHover: (dragCardId: string, hoverIndex: number, prevSectionIndex: number, sectionIndex: number) => void
-    onDrop: (dragCardId: string, hoverIndex: number, sectionIndex: number) => void
     onDelete: (sectionId: string, cardId: string) => void
 }
 
@@ -28,8 +27,9 @@ export interface PassProp {
 
 
 
-export default function Card({ properties, positionIndex, sectionIndex, onHover, onDrop, onDelete }: CardProp) {
+export default function Card({ properties, positionIndex, sectionIndex, onDelete}: CardProp) {
     const ref = useRef(null);
+    const {onHoverSwapCard, onDropSwapCard} = useBoardContext();
 
     //Drop to todos that are in the same section
     const [_, drop] = useDrop({
@@ -54,12 +54,12 @@ export default function Card({ properties, positionIndex, sectionIndex, onHover,
                 //drag is above but less than middle
                 if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
 
-                onHover(item._id, hoverIndex, item.sectionIndex, sectionIndex);
+                onHoverSwapCard(item._id, hoverIndex, item.sectionIndex, sectionIndex);
                 item.index = hoverIndex;
             }
         },
         drop: (item: PassProp, monitor) => {
-            onDrop(item._id, item.index, sectionIndex)
+            onDropSwapCard(item._id, item.index, sectionIndex)
         },
     });
 

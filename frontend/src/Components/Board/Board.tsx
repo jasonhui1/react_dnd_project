@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, createContext } from 'react';
+import React, { useState, useEffect} from 'react';
 import * as api from '../../api';
 import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input, Divider, Stack } from '@chakra-ui/react';
 import SectionComponent, { Section } from '../Board/Section';
@@ -7,7 +7,6 @@ import { useParams } from 'react-router-dom';
 import { BoardContextProvider } from '../../context/board';
 
 
-const BoardContext = createContext(null);
 
 export default function Board() {
   const [title, setTitle] = useState('')
@@ -112,7 +111,7 @@ export default function Board() {
               return (
                 <Box w='450px' key={section._id} >
                   {/* <Box w='450px' h='fit-content' key={section._id}> */}
-                  <SectionComponent properties={section} positionIndex={index} handleDrop={handleDrop} onHoverSwapCard={onHoverSwapCard} onDropSwapCard={onDropSwapCard} onClickDeleteSection={onClickDeleteSection} onClickAddCard={onClickAddCard} onClickDeleteCard={onClickDeleteCard} />
+                  <SectionComponent properties={section} positionIndex={index} />
                 </Box>
               )
             })
