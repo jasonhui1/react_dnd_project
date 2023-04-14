@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Flex, Button, Box, Heading, Input, Stack, Divider } from '@chakra-ui/react';
-import { useDrop } from "react-dnd";
+import { useDrag, useDrop } from "react-dnd";
 import Card, { PassProp } from './Card';
 import { Todo } from '../../types/Todo';
 import { useBoardContext } from '../../context/board';
@@ -19,30 +19,85 @@ interface DropSectionProps {
     children: React.ReactNode
 }
 
-function DropSection({ positionIndex, children }: DropSectionProps) {
+interface SectionItemPassProp {
+    index: number
+}
 
-    const { onDropSwapCardSection } = useBoardContext();
+function DropSection({ positionIndex, children }: DropSectionProps) {
+    const ref = useRef(null);
+
+    const { onDropSwapCardSection, onHoverSwapSection } = useBoardContext();
 
     //Drop to the section->Add it
     const [{ isOver }, drop] = useDrop({
-        accept: ItemTypes.CARD,
+        accept: [ItemTypes.CARD, ItemTypes.SECTION],
         drop: (item: PassProp, monitor) => {
-            const didDrop = monitor.didDrop()
-            if (didDrop) return //Drop on cards already
+            console.log('monitor.getItemType()', monitor.getItemType())
 
-            const { _id, sectionIndex } = item
-            const prevSectionIndex = sectionIndex
-            onDropSwapCardSection(_id, prevSectionIndex, positionIndex,)
+            if (monitor.getItemType() === ItemTypes.CARD) {
+                const didDrop = monitor.didDrop()
+                if (didDrop) return //Drop on cards already
+
+                const { _id, sectionIndex } = item
+                const prevSectionIndex = sectionIndex
+                onDropSwapCardSection(_id, prevSectionIndex, positionIndex,)
+            }
+
+            if (monitor.getItemType() === ItemTypes.SECTION) {
+                const prevIndex = item.index
+                const newIndex = positionIndex
+
+                // onHoverSwapSection(prevIndex, newIndex,)
+                //onDrop
+            }
+
 
         },
+        hover(item: SectionItemPassProp, monitor) {
+            if (!ref.current) return
+
+
+            const prevIndex = item.index
+            const newIndex = positionIndex
+            if (prevIndex === newIndex) return
+
+            // Calculate the middle
+            const hoveredRect = (ref.current as Element).getBoundingClientRect();
+            const hoverMiddleX = (hoveredRect.right - hoveredRect.left) / 2;
+            const mousePosition = monitor.getClientOffset();
+
+            if (mousePosition !== null) {
+                const hoverClientX = mousePosition.x - hoveredRect.left;
+
+                //drag is below but less than middle
+                if (prevIndex < newIndex && hoverClientX < hoverMiddleX) return;
+                //drag is above but less than middle
+                if (prevIndex > newIndex && hoverClientX > hoverMiddleX) return;
+
+                onHoverSwapSection(prevIndex, newIndex)
+                item.index = newIndex;
+            }
+
+        },
+
         collect: (monitor) => ({
             isOver: !!monitor.isOver(),
         }),
     });
 
+    const [{ isDragging }, drag] = useDrag({
+        type: ItemTypes.SECTION,
+        item: { index: positionIndex },
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    });
+    drag(drop(ref));
+
+
 
     return (
-        <Flex direction='column' h='calc(100vh)' ref={drop}>
+        <Flex direction='column' h='calc(100vh)' ref={ref}>
 
             <Box
                 w="full"

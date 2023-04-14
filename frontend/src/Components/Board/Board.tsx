@@ -66,6 +66,28 @@ export default function Board() {
   };
 
 
+  const onHoverSwapSection = (prevSectionIndex: number, newSectionIndex: number) => {
+    // Find previous indexes
+    console.log('prevSectionIndex', prevSectionIndex, )
+
+    console.log('newSectionIndex', newSectionIndex)
+    const updatedSections = [...sections]
+    // Update
+    console.log('beforeSections', sections)
+    const section = sections[prevSectionIndex]
+    updatedSections.splice(prevSectionIndex, 1);
+    console.log('between Sections', updatedSections)
+
+    updatedSections.splice(newSectionIndex, 0, section);
+
+    console.log('updatedSections', updatedSections)
+
+
+    //Update section
+    setSections(updatedSections);
+  };
+
+
   async function onClickAddSection(title: string) {
     //Add section to database -> get it
     const { data } = await api.createSection(id, title);
@@ -96,6 +118,8 @@ export default function Board() {
       onClickDeleteSection={onClickDeleteSection}
       onClickAddCard={onClickAddCard}
       onClickDeleteCard={onClickDeleteCard}
+
+      onHoverSwapSection={onHoverSwapSection}
     >
 
       <Box>
