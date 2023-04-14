@@ -15,6 +15,7 @@ export interface Section {
 }
 
 interface DropSectionProps {
+    id:string
     positionIndex: number,
     children: React.ReactNode
 }
@@ -23,16 +24,15 @@ interface SectionItemPassProp {
     index: number
 }
 
-function DropSection({ positionIndex, children }: DropSectionProps) {
+function DropSection({ id, positionIndex, children }: DropSectionProps) {
     const ref = useRef(null);
 
-    const { onDropSwapCardSection, onHoverSwapSection } = useBoardContext();
+    const { onDropSwapCardSection, onHoverSwapSection, onDropSwapSectionPosition } = useBoardContext();
 
     //Drop to the section->Add it
     const [{ isOver }, drop] = useDrop({
         accept: [ItemTypes.CARD, ItemTypes.SECTION],
         drop: (item: PassProp, monitor) => {
-            console.log('monitor.getItemType()', monitor.getItemType())
 
             if (monitor.getItemType() === ItemTypes.CARD) {
                 const didDrop = monitor.didDrop()
@@ -46,36 +46,41 @@ function DropSection({ positionIndex, children }: DropSectionProps) {
             if (monitor.getItemType() === ItemTypes.SECTION) {
                 const prevIndex = item.index
                 const newIndex = positionIndex
+                console.log('prevIndex', prevIndex)
+                console.log('newIndex', newIndex)
 
-                // onHoverSwapSection(prevIndex, newIndex,)
+                onDropSwapSectionPosition(id,newIndex)
                 //onDrop
             }
 
 
         },
         hover(item: SectionItemPassProp, monitor) {
-            if (!ref.current) return
+            if (monitor.getItemType() === ItemTypes.SECTION) {
+
+                if (!ref.current) return
 
 
-            const prevIndex = item.index
-            const newIndex = positionIndex
-            if (prevIndex === newIndex) return
+                const prevIndex = item.index
+                const newIndex = positionIndex
+                if (prevIndex === newIndex) return
 
-            // Calculate the middle
-            const hoveredRect = (ref.current as Element).getBoundingClientRect();
-            const hoverMiddleX = (hoveredRect.right - hoveredRect.left) / 2;
-            const mousePosition = monitor.getClientOffset();
+                // Calculate the middle
+                const hoveredRect = (ref.current as Element).getBoundingClientRect();
+                const hoverMiddleX = (hoveredRect.right - hoveredRect.left) / 2;
+                const mousePosition = monitor.getClientOffset();
 
-            if (mousePosition !== null) {
-                const hoverClientX = mousePosition.x - hoveredRect.left;
+                if (mousePosition !== null) {
+                    const hoverClientX = mousePosition.x - hoveredRect.left;
 
-                //drag is below but less than middle
-                if (prevIndex < newIndex && hoverClientX < hoverMiddleX) return;
-                //drag is above but less than middle
-                if (prevIndex > newIndex && hoverClientX > hoverMiddleX) return;
+                    //drag is below but less than middle
+                    if (prevIndex < newIndex && hoverClientX < hoverMiddleX) return;
+                    //drag is above but less than middle
+                    if (prevIndex > newIndex && hoverClientX > hoverMiddleX) return;
 
-                onHoverSwapSection(prevIndex, newIndex)
-                item.index = newIndex;
+                    onHoverSwapSection(prevIndex, newIndex)
+                    item.index = newIndex;
+                }
             }
 
         },
@@ -122,7 +127,7 @@ export default function SectionComponent({ properties, positionIndex }: SectionP
     const { onClickDeleteSection, onClickAddCard } = useBoardContext();
 
     return (
-        <DropSection positionIndex={positionIndex}>
+        <DropSection positionIndex={positionIndex} id={properties._id}>
             <Flex direction='column' justify='space-between' h='full' p='3'>
                 <Box>
                     <Flex gap='2' mt='5' mb='1' align='center'>

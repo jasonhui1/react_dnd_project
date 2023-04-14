@@ -84,4 +84,34 @@ export const deleteBoard =  async (req, res) => {
   }
 };
 
-// export default router;
+//Drop section to a new position
+export const patchSectionPosition = async (req, res) => {
+  const { boardId } = req.params;
+  const { sectionId, newIndex } = req.body;
+  const userId = req.userId
+
+  try {
+    const document = await Board.findById(boardId).where('createdBy').equals(userId);
+    if (!document) throw new Error(`No document found with id: ${boardId}`);
+
+
+    //Get section
+    const prevIndex = document.sections.findIndex(section => section._id.toString() === sectionId)
+
+    let section = document.sections[prevIndex]
+    section = section.toObject() //cannot push with existing _id
+    delete section._id
+    console.log('documentA', document)
+
+    //Swap
+    document.sections.splice(prevIndex, 1)
+    document.sections.splice(newIndex, 0, section)
+
+    // Save the updated document
+    console.log('document', document)
+    const updatedDocument = await document.save();
+    res.status(200).json(updatedDocument)
+} catch (error) {
+    res.status(409).json({ message: "swap fail" })
+}
+};
