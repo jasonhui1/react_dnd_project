@@ -7,6 +7,7 @@ import { useBoardContext } from '../../context/board';
 import DeleteButton from '../DeleteButton';
 import { ItemTypes } from '../../types/ItemType';
 import AddForm from '../AddForm';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export interface Section {
     _id: string
@@ -15,7 +16,7 @@ export interface Section {
 }
 
 interface DropSectionProps {
-    id:string
+    id: string
     positionIndex: number,
     children: React.ReactNode
 }
@@ -49,7 +50,7 @@ function DropSection({ id, positionIndex, children }: DropSectionProps) {
                 console.log('prevIndex', prevIndex)
                 console.log('newIndex', newIndex)
 
-                onDropSwapSectionPosition(id,newIndex)
+                onDropSwapSectionPosition(id, newIndex)
                 //onDrop
             }
 
@@ -159,15 +160,25 @@ function CardList({ section, positionIndex }: CardListsProps) {
 
     return (
         <Stack gap={1}>
-            {
-                section.cards.map((card: Todo, index) => {
-                    return (
-                        <Card key={card._id} properties={card} positionIndex={index} sectionIndex={positionIndex}
-                            onDelete={() => onClickDeleteCard(section._id, card._id)} />
+            <AnimatePresence initial={false}>
+                {
+                    section.cards.map((card: Todo, index) => {
+                        return (
+                            <motion.div
+                                key={card._id}
+                                initial={{ opacity: 1, maxHeight: 0 }}
+                                animate={{ opacity: 1, maxHeight: '50px' }}
+                                exit={{ opacity: 0, maxHeight: 0 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <Card properties={card} positionIndex={index} sectionIndex={positionIndex}
+                                    onDelete={() => onClickDeleteCard(section._id, card._id)} />
+                            </motion.div>
 
-                    )
-                })
-            }
+                        )
+                    })
+                }
+            </AnimatePresence>
         </Stack>
     )
 }

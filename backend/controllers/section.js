@@ -112,8 +112,8 @@ export const swapCard = async (req, res) => {
         const prevSectionIndex = document.sections.findIndex(section => section.cards.some(card => card._id.toString() === cardId))
         const currentCardIndex = document.sections[prevSectionIndex].cards.findIndex(card => card._id.toString() === cardId)
         let card = document.sections[prevSectionIndex].cards[currentCardIndex];
-        card = card.toObject() //cannot push with existing _id
-        delete card._id
+        // card = card.toObject() //cannot push with existing _id
+        // delete card._id
 
         //Swap
         document.sections[prevSectionIndex].cards.splice(currentCardIndex, 1)
