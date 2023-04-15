@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { BoardContextProvider } from '../../context/board';
 import AddForm from '../AddForm';
 
+
 export default function Board() {
   const [title, setTitle] = useState('')
   const [sections, setSections] = useState<Section[]>([{ _id: 'A', title: 'Element', cards: [] }, { _id: 'B', title: 'Anime', cards: [] }])
