@@ -12,7 +12,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 export interface Section {
     _id: string
     title: string
-    cards: Todo[]
+    cards: CardType[]
+}
+
+interface CardType extends Todo {
+    hovering?: number
 }
 
 interface DropSectionProps {
@@ -108,7 +112,7 @@ function DropSection({ id, positionIndex, children }: DropSectionProps) {
             <Box
                 w="full"
                 bg="red.500"
-                opacity={isOver ? 0.5 : 1}
+                // opacity={isOver ? 0.5 : 1}
                 rounded={'3xl'}
             >
                 {children}
@@ -131,7 +135,7 @@ export default function SectionComponent({ properties, positionIndex }: SectionP
         <DropSection positionIndex={positionIndex} id={properties._id}>
             <Flex direction='column' justify='space-between' h='full' p='3'>
                 <Box>
-                    <Flex gap='2' mt='5' mb='1' align='center'>
+                    <Flex gap='2' align='center'>
 
                         <Heading as='h2' size={'lg'}>{properties.title}</Heading>
                         <DeleteButton onClick={() => onClickDeleteSection(properties._id)} />
@@ -159,17 +163,18 @@ function CardList({ section, positionIndex }: CardListsProps) {
     const { onClickDeleteCard } = useBoardContext();
 
     return (
-        <Stack gap={1}>
+        <Stack gap={0}>
             <AnimatePresence initial={false}>
                 {
-                    section.cards.map((card: Todo, index) => {
+                    section.cards.map((card: CardType, index) => {
+
                         return (
                             <motion.div
-                                key={card._id}
+                                key={card._id + (card.hovering?.toString())}
                                 initial={{ opacity: 1, maxHeight: 0 }}
-                                animate={{ opacity: 1, maxHeight: '50px' }}
+                                animate={{ opacity: 1, maxHeight: '40px' }}
                                 exit={{ opacity: 0, maxHeight: 0 }}
-                                transition={{ duration: 0.2 }}
+                                transition={{ duration: 0.2, ease: 'linear' }}
                             >
                                 <Card properties={card} positionIndex={index} sectionIndex={positionIndex}
                                     onDelete={() => onClickDeleteCard(section._id, card._id)} />

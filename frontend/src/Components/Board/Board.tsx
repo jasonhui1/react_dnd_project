@@ -6,7 +6,6 @@ import { useParams } from 'react-router-dom';
 import { BoardContextProvider } from '../../context/board';
 import AddForm from '../AddForm';
 
-
 export default function Board() {
   const [title, setTitle] = useState('')
   const [sections, setSections] = useState<Section[]>([{ _id: 'A', title: 'Element', cards: [] }, { _id: 'B', title: 'Anime', cards: [] }])
@@ -44,15 +43,19 @@ export default function Board() {
     updateSections[prevSectionIndex].cards = updateSections[prevSectionIndex].cards.filter(card => card._id !== cardId);
     updateSections[newSectionIndex].cards.splice(newIndex, 0, card);
 
+    //Tell rerender animation
+    updateSections[newSectionIndex].cards[newIndex].hovering=newIndex
+
     //Update section
     setSections(updateSections);
   };
 
 
   //Card, index to place in, section to place in
-  const onDropSwapCardPosition = async (cardId: string, newPositionIndex: number, currentSectionIndex: number) => {
+  const onDropSwapCardPosition = async (cardId: string, newIndex: number, newSectionIndex: number) => {
 
-    const { data } = await api.changeCardPosition(id, cardId, newPositionIndex, currentSectionIndex)
+    const { data } = await api.changeCardPosition(id, cardId, newIndex, newSectionIndex)
+    // data.sections[newSectionIndex].cards[newIndex].hovering = undefined
     setSections(data.sections)
   }
 

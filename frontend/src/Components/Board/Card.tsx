@@ -6,7 +6,6 @@ import { Todo } from '../../types/Todo';
 import { useBoardContext } from '../../context/board';
 import DeleteButton from '../DeleteButton';
 import { ItemTypes } from '../../types/ItemType';
-import { AnimatePresence, motion } from 'framer-motion';
 
 interface XYCoord {
     x: number,
@@ -56,6 +55,7 @@ export default function Card({ properties, positionIndex, sectionIndex, onDelete
 
                 onHoverSwapCard(item._id, hoverIndex, sectionIndex);
                 item.index = hoverIndex;
+                item.sectionIndex=sectionIndex
             }
         },
         drop: (item: PassProp, monitor) => {
@@ -77,7 +77,12 @@ export default function Card({ properties, positionIndex, sectionIndex, onDelete
         f()
     }
     return (
-        <Box bg={isDragging ? 'gray.800' : 'blue.500'} w='max(200px,full)' px='5' py='2' rounded={'2xl'} opacity={isDragging ? 0.5 : 1} ref={ref}>
+        <Box 
+        // bg={isDragging ? 'gray.800' : 'blue.500'} 
+        bg='blue.500'
+        w='max(200px,full)' px='5' py='2' rounded={'2xl'} 
+        // opacity={isDragging ? 0.5 : 1} 
+        ref={ref}>
             <Flex align={'center'} > 
 
                 <Text as='span' color='white'>{properties.title}</Text>
