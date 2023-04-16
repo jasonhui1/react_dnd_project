@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { forwardRef, useRef } from 'react';
 import { OrderedList, ListItem, Flex, Checkbox, Button, Text, Box, Heading, Input } from '@chakra-ui/react';
 import { useDrag, useDrop, DragPreviewImage } from "react-dnd";
 import { Todo } from '../../types/Todo';
@@ -17,6 +17,7 @@ interface CardProp {
     positionIndex: number //Index in the section
     sectionIndex: number
     onDelete: (sectionId: string, cardId: string) => void
+    onSwap: (index1: number, index2: number) => void
 }
 
 // Props for passing between components when dragging and dropping
@@ -26,68 +27,74 @@ export interface PassProp {
     sectionIndex: number
 }
 
-export default function Card({ properties, positionIndex, sectionIndex, onDelete }: CardProp) {
-    const ref = useRef(null);
-    const { onHoverSwapCard, onDropSwapCardPosition } = useBoardContext();
+const Card = forwardRef<HTMLLIElement, CardProp>(
+    ({ properties, positionIndex, sectionIndex, onDelete, onSwap }, ref) => {
+        const cardRef = useRef(null);
+        const { onHoverSwapCard, onDropSwapCardPosition } = useBoardContext();
 
-    //Drop the card on the card that is in the same section
-    const [_, drop] = useDrop({
-        accept: ItemTypes.CARD,
-        hover(item: PassProp, monitor) {
-            if (!ref.current) return
+        //Drop the card on the card that is in the same section
+        const [_, drop] = useDrop({
+            accept: ItemTypes.CARD,
+            hover(item: PassProp, monitor) {
+                if (!cardRef.current) return
 
-            const dragIndex = item.index;
-            const hoverIndex = positionIndex;
-            if (dragIndex === hoverIndex && sectionIndex === item.sectionIndex) return
+                const dragIndex = item.index;
+                const hoverIndex = positionIndex;
+                if (dragIndex === hoverIndex && sectionIndex === item.sectionIndex) return
 
-            // Calculate the middle
-            const hoveredRect = (ref.current as Element).getBoundingClientRect();
-            const hoverMiddleY = (hoveredRect.bottom - hoveredRect.top) / 2;
-            const mousePosition: XYCoord | null = monitor.getClientOffset();
+                // Calculate the middle
+                const hoveredRect = (cardRef.current as Element).getBoundingClientRect();
+                const hoverMiddleY = (hoveredRect.bottom - hoveredRect.top) / 2;
+                const mousePosition: XYCoord | null = monitor.getClientOffset();
 
-            if (mousePosition !== null) {
-                const hoverClientY = mousePosition.y - hoveredRect.top;
+                if (mousePosition !== null) {
+                    const hoverClientY = mousePosition.y - hoveredRect.top;
 
-                //drag is below but less than middle
-                if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
-                //drag is above but less than middle
-                if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
+                    //drag is below but less than middle
+                    if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) return;
+                    //drag is above but less than middle
+                    if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) return;
 
-                onHoverSwapCard(item._id, hoverIndex, sectionIndex);
-                item.index = hoverIndex;
-                item.sectionIndex=sectionIndex
-            }
-        },
-        drop: (item: PassProp, monitor) => {
-            onDropSwapCardPosition(item._id, item.index, sectionIndex)
-        },
+                    onHoverSwapCard(item._id, hoverIndex, sectionIndex);
+                    onSwap(hoverIndex, dragIndex)
+                    item.index = hoverIndex;
+                    item.sectionIndex = sectionIndex
+                }
+            },
+            drop: (item: PassProp, monitor) => {
+                onDropSwapCardPosition(item._id, item.index, sectionIndex)
+            },
+        });
+
+        const [{ isDragging }, drag] = useDrag({
+            type: ItemTypes.CARD,
+            item: { _id: properties._id, index: positionIndex, sectionIndex: sectionIndex },
+            collect: (monitor) => ({
+                isDragging: monitor.isDragging(),
+            }),
+        });
+
+        drag(drop(cardRef));
+
+        const onClick = (f: any) => {
+            f()
+        }
+        return (
+            <Box
+                // bg={isDragging ? 'gray.800' : 'blue.500'} 
+                bg='blue.500'
+                w='max(200px,full)' px='5' py='2' rounded={'2xl'}
+                // opacity={isDragging ? 0.5 : 1} 
+                ref={(el) => {
+                    cardRefz.current = el;
+                    ref.current = el;
+                }}>
+                <Flex align={'center'} >
+
+                    <Text as='span' color='white'>{properties.title}</Text>
+                    <DeleteButton onClick={() => onClick(onDelete)} />
+                </Flex>
+            </Box >
+        );
     });
-
-    const [{ isDragging }, drag] = useDrag({
-        type: ItemTypes.CARD,
-        item: { _id: properties._id, index: positionIndex, sectionIndex: sectionIndex },
-        collect: (monitor) => ({
-            isDragging: monitor.isDragging(),
-        }),
-    });
-
-    drag(drop(ref));
-
-    const onClick = (f: any) => {
-        f()
-    }
-    return (
-        <Box 
-        // bg={isDragging ? 'gray.800' : 'blue.500'} 
-        bg='blue.500'
-        w='max(200px,full)' px='5' py='2' rounded={'2xl'} 
-        // opacity={isDragging ? 0.5 : 1} 
-        ref={ref}>
-            <Flex align={'center'} > 
-
-                <Text as='span' color='white'>{properties.title}</Text>
-                <DeleteButton onClick={()=>onClick(onDelete)} />
-            </Flex>
-        </Box>
-    );
-};
+export default Card
