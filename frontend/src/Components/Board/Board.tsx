@@ -5,6 +5,7 @@ import SectionComponent, { Section } from '../Board/Section';
 import { useParams } from 'react-router-dom';
 import { BoardContextProvider } from '../../context/board';
 import AddForm from '../AddForm';
+import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Board() {
   const [title, setTitle] = useState('')
@@ -44,7 +45,7 @@ export default function Board() {
     updateSections[newSectionIndex].cards.splice(newIndex, 0, card);
 
     //Tell rerender animation
-    updateSections[newSectionIndex].cards[newIndex].hovering=newIndex
+    updateSections[newSectionIndex].cards[newIndex].hovering = newIndex
 
     //Update section
     setSections(updateSections);
@@ -77,6 +78,9 @@ export default function Board() {
     const section = sections[prevSectionIndex]
     updatedSections.splice(prevSectionIndex, 1);
     updatedSections.splice(newSectionIndex, 0, section);
+
+    //Tell rerender animation
+    updatedSections[newSectionIndex].hovering = newSectionIndex
 
     //Update section
     setSections(updatedSections);
@@ -148,15 +152,26 @@ interface SectionListsProps {
 function SectionList({ sections }: SectionListsProps) {
   return (
     <>
-      {
-        sections.map((section, index) => {
-          return (
-            <Box w='450px' key={section._id} >
-              <SectionComponent properties={section} positionIndex={index} />
-            </Box>
-          )
-        })
-      }
+      <AnimatePresence initial={false}>
+        {
+          sections.map((section, index) => {
+            return (
+
+              <motion.div
+                key={section._id + (section.hovering?.toString())}
+                initial={{ opacity: 1, maxWidth: 0 }}
+                animate={{ opacity: 1, maxWidth: '450px' }}
+                exit={{ opacity: 0, maxWidth: 0 }}
+                transition={{ duration: 0.2, ease: 'linear' }}
+              >
+                <Box w='450px' >
+                  <SectionComponent properties={section} positionIndex={index} />
+                </Box>
+              </motion.div>
+            )
+          })
+        }
+      </AnimatePresence>
     </>
   )
 }

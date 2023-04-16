@@ -13,6 +13,7 @@ export interface Section {
     _id: string
     title: string
     cards: CardType[]
+    hovering?:number
 }
 
 interface CardType extends Todo {
@@ -38,6 +39,7 @@ function DropSection({ id, positionIndex, children }: DropSectionProps) {
     const [{ isOver }, drop] = useDrop({
         accept: [ItemTypes.CARD, ItemTypes.SECTION],
         drop: (item: PassProp, monitor) => {
+            console.log('monitor.getItemType()', monitor.getItemType())
 
             if (monitor.getItemType() === ItemTypes.CARD) {
                 const didDrop = monitor.didDrop()
@@ -53,6 +55,7 @@ function DropSection({ id, positionIndex, children }: DropSectionProps) {
                 const newIndex = positionIndex
                 console.log('prevIndex', prevIndex)
                 console.log('newIndex', newIndex)
+                // if(prevIndex === newIndex) return
 
                 onDropSwapSectionPosition(id, newIndex)
                 //onDrop
@@ -172,7 +175,7 @@ function CardList({ section, positionIndex }: CardListsProps) {
                             <motion.div
                                 key={card._id + (card.hovering?.toString())}
                                 initial={{ opacity: 1, maxHeight: 0 }}
-                                animate={{ opacity: 1, maxHeight: '40px' }}
+                                animate={{ opacity: 1, maxHeight: '100px' }}
                                 exit={{ opacity: 0, maxHeight: 0 }}
                                 transition={{ duration: 0.2, ease: 'linear' }}
                             >
