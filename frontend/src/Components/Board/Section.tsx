@@ -160,7 +160,31 @@ interface CardListsProps {
 }
 
 function CardList({ section, positionIndex }: CardListsProps) {
+    const cardRefs = useRef<Array<React.RefObject<HTMLDivElement>>>(
+        Array(section.cards.length)
+            .fill(null)
+            .map(() => React.createRef<HTMLDivElement>())
+    );
     const { onClickDeleteCard } = useBoardContext();
+
+    const handleSwap = (index1: number, index2: number) => {
+        const cardHeights = section.cards.map((card, index) => {
+            const element = cardRefs.current[index].current as HTMLElement;
+            return element.offsetHeight;
+        });
+        // const distance = cardHeights
+        //     .slice(Math.min(index1, index2), Math.max(index1, index2))
+        //     .reduce((acc, height) => acc + height, 0);
+
+        let offset = 0;
+        cardRefs.current.forEach((cardRef, index) => {
+            if (index >= Math.min(index1, index2) && index <= Math.max(index1, index2)) {
+                const element = cardRef.current as HTMLElement;
+                element.style.transform = `translateY(${offset}px)`;
+                offset += cardHeights[index];
+            }
+        });
+    };
 
     return (
         <Stack gap={0}>
@@ -169,16 +193,18 @@ function CardList({ section, positionIndex }: CardListsProps) {
                     section.cards.map((card: CardType, index) => {
 
                         return (
-                            <motion.div
-                                key={card._id + (card.hovering?.toString())}
+                            <Box as={motion.div}
+                                key={card._id}
                                 initial={{ opacity: 1, maxHeight: 0 }}
                                 animate={{ opacity: 1, maxHeight: '40px' }}
                                 exit={{ opacity: 0, maxHeight: 0 }}
-                                transition={{ duration: 0.2, ease: 'linear' }}
+                                transition='0.2s linear'
+
                             >
                                 <Card properties={card} positionIndex={index} sectionIndex={positionIndex}
-                                    onDelete={() => onClickDeleteCard(section._id, card._id)} />
-                            </motion.div>
+                                    onDelete={() => onClickDeleteCard(section._id, card._id)} onSwap={handleSwap}
+                                    ref={cardRefs.current[index]} />
+                            </Box>
 
                         )
                     })

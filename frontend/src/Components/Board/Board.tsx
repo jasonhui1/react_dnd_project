@@ -43,12 +43,10 @@ export default function Board() {
     updateSections[prevSectionIndex].cards = updateSections[prevSectionIndex].cards.filter(card => card._id !== cardId);
     updateSections[newSectionIndex].cards.splice(newIndex, 0, card);
 
-    //Tell rerender animation
-    updateSections[newSectionIndex].cards[newIndex].hovering=newIndex
-
     //Update section
     setSections(updateSections);
   };
+
 
 
   //Card, index to place in, section to place in
