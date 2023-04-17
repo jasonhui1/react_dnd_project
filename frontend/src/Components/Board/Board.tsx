@@ -44,8 +44,6 @@ export default function Board() {
     updateSections[prevSectionIndex].cards = updateSections[prevSectionIndex].cards.filter(card => card._id !== cardId);
     updateSections[newSectionIndex].cards.splice(newIndex, 0, card);
 
-    //Tell rerender animation
-    updateSections[newSectionIndex].cards[newIndex].hovering = newIndex
 
     //Update section
     setSections(updateSections);
@@ -56,7 +54,6 @@ export default function Board() {
   const onDropSwapCardPosition = async (cardId: string, newIndex: number, newSectionIndex: number) => {
 
     const { data } = await api.changeCardPosition(id, cardId, newIndex, newSectionIndex)
-    // data.sections[newSectionIndex].cards[newIndex].hovering = undefined
     setSections(data.sections)
   }
 
@@ -78,9 +75,6 @@ export default function Board() {
     const section = sections[prevSectionIndex]
     updatedSections.splice(prevSectionIndex, 1);
     updatedSections.splice(newSectionIndex, 0, section);
-
-    //Tell rerender animation
-    updatedSections[newSectionIndex].hovering = newSectionIndex
 
     //Update section
     setSections(updatedSections);
@@ -158,7 +152,8 @@ function SectionList({ sections }: SectionListsProps) {
             return (
 
               <motion.div
-                key={section._id + (section.hovering?.toString())}
+                key={section._id}
+                layoutId={section._id}
                 initial={{ opacity: 1, maxWidth: 0 }}
                 animate={{ opacity: 1, maxWidth: '450px' }}
                 exit={{ opacity: 0, maxWidth: 0 }}

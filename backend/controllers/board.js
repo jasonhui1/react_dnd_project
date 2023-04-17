@@ -100,8 +100,6 @@ export const patchSectionPosition = async (req, res) => {
 
     let section = document.sections[prevIndex]
     section = section.toObject() //cannot push with existing _id
-    delete section._id
-    console.log('documentA', document)
 
     //Swap
     document.sections.splice(prevIndex, 1)

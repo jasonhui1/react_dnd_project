@@ -30,6 +30,8 @@ export default function Card({ properties, positionIndex, sectionIndex, onDelete
     const ref = useRef(null);
     const { onHoverSwapCard, onDropSwapCardPosition } = useBoardContext();
 
+    console.log('properties.title', properties.title)
+
     //Drop the card on the card that is in the same section
     const [_, drop] = useDrop({
         accept: ItemTypes.CARD,
